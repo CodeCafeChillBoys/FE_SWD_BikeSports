@@ -79,7 +79,7 @@ const bikes = [
 
     {
         id: 'b3',
-        sellerId: 'u5',
+        sellerId: 'u2',
         title: 'VanMoof S3',
         brand: 'VanMoof',
         type: 'Xe đạp điện',

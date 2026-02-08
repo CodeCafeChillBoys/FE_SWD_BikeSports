@@ -55,7 +55,7 @@ export default function ListingCard({ item }) {
 
                     <div>
                         <p className="text-gray-500">Đăng ngày</p>
-                        <p>{item.date}</p>
+                        <p>{item.createdAt}</p>
                     </div>
                 </div>
             </div>

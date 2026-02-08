@@ -1,8 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom"
-import SellerLayout from "../layouts/SellerLayout"
 import DashboardPage from "../Home/DashboardPage"
 import CreateListingPage from "../Home/CreateListingPage"
 import SellerListingsPage from "../Home/SellerListingPage"
+import SellerLayout from "../layouts/sellerLayout"
 
 function SellerRoutes() {
     return (
@@ -21,5 +21,4 @@ function SellerRoutes() {
         </Routes>
     )
 }
-
 export default SellerRoutes

@@ -1,4 +1,8 @@
+import { useNavigate } from "react-router-dom"
+
 function RecentItem({ bike }) {
+    const navigate = useNavigate()
+
     return (
         <div className="flex justify-between items-center py-4 border-t">
             <div className="flex gap-4">
@@ -21,8 +25,10 @@ function RecentItem({ bike }) {
                     </p>
                 </div>
             </div>
-
-            <button className="border px-4 py-1.5 rounded-lg text-sm">
+            <button
+                onClick={() => navigate('/seller/listings')}
+                className="border px-4 py-1.5 rounded-lg text-sm"
+            >
                 Quản lý
             </button>
         </div>
