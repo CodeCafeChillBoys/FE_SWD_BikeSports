@@ -47,8 +47,12 @@ export default function DashboardPage() {
 
             {/* ===== QUICK ACTIONS ===== */}
             <div className="grid md:grid-cols-4 gap-4 mb-8">
-                {quickActions.map((action) => (
-                    <QuickAction key={action.id} label={action.label} />
+                {quickActions.map(action => (
+                    <QuickAction
+                        key={action.id}
+                        label={action.label}
+                        to={action.to}
+                    />
                 ))}
             </div>
 

@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom"
 import SellerLayout from "../layouts/SellerLayout"
 import DashboardPage from "../Home/DashboardPage"
 import CreateListingPage from "../Home/CreateListingPage"
+import SellerListingsPage from "../Home/SellerListingPage"
 
 function SellerRoutes() {
     return (
@@ -12,7 +13,7 @@ function SellerRoutes() {
             <Route path="/seller" element={<SellerLayout />}>
                 <Route index element={<DashboardPage />} />
                 <Route path="listings/new" element={<CreateListingPage />} />
-                {/* <Route path="listings" element={<SellerListings />} /> */}
+                <Route path="listings" element={<SellerListingsPage />} />
                 {/* <Route path="orders" element={<SellerOrders />} />
                 <Route path="messages" element={<SellerMessages />} />
                 <Route path="reviews" element={<SellerReviews />} /> */}

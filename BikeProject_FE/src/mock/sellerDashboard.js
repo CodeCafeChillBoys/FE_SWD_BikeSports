@@ -8,10 +8,10 @@ export const sellerStats = {
 }
 
 export const quickActions = [
-    { id: "listings", label: "Quản lý tin đăng", icon: "bike" },
-    { id: "orders", label: "Quản lý đơn hàng", icon: "package" },
-    { id: "messages", label: "Tin nhắn", icon: "message" },
-    { id: "reviews", label: "Đánh giá", icon: "star" }
+    { id: 1, label: "Đăng tin mới", to: "/seller/listings/new" },
+    { id: 2, label: "Tin đang bán", to: "/seller/listings" },
+    { id: 3, label: "Đơn hàng", to: "/seller/orders" },
+    { id: 4, label: "Thống kê", to: "/seller/statistics" },
 ]
 
 export const recentListings = [
