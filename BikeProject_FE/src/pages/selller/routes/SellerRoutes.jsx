@@ -3,6 +3,7 @@ import DashboardPage from "../Home/DashboardPage"
 import CreateListingPage from "../Home/CreateListingPage"
 import SellerListingsPage from "../Home/SellerListingPage"
 import SellerLayout from "../layouts/sellerLayout"
+import OrderPage from "../Home/OrderPage"
 
 function SellerRoutes() {
     return (
@@ -14,9 +15,9 @@ function SellerRoutes() {
                 <Route index element={<DashboardPage />} />
                 <Route path="listings/new" element={<CreateListingPage />} />
                 <Route path="listings" element={<SellerListingsPage />} />
-                {/* <Route path="orders" element={<SellerOrders />} />
-                <Route path="messages" element={<SellerMessages />} />
-                <Route path="reviews" element={<SellerReviews />} /> */}
+                <Route path="orders" element={<OrderPage />} />
+                {/* // <Route path="messages" element={<SellerMessages />} />
+                // <Route path="reviews" element={<SellerReviews />} /> */}
             </Route>
         </Routes>
     )

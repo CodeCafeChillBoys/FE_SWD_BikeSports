@@ -34,5 +34,4 @@ function RecentItem({ bike }) {
         </div>
     )
 }
-
 export default RecentItem
