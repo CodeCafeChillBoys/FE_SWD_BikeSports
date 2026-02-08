@@ -44,9 +44,13 @@ export default function Header() {
                 </nav>
 
                 {/* RIGHT: User */}
-                <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gray-300" />
-                    <span className="text-sm font-medium">Nguyễn Văn An</span>
+                <div className="flex items-center gap-3">
+                    <img
+                        src="https://i.pravatar.cc/40"
+                        alt="avatar"
+                        className="w-8 h-8 rounded-full object-cover"
+                    />
+                    <span className="text-sm font-medium">Bùi Đăng</span>
                 </div>
 
             </div>

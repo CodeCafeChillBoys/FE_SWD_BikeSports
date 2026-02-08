@@ -5,6 +5,7 @@ import {
     MessageCircle,
     Star
 } from "lucide-react"
+import { NavLink } from "react-router-dom"
 
 export default function Header() {
     return (
@@ -25,11 +26,31 @@ export default function Header() {
 
                         {/* Menu */}
                         <nav className="flex items-center gap-2">
-                            <MenuItem active icon={<LayoutDashboard size={16} />} label="Dashboard" />
-                            <MenuItem icon={<Bike size={16} />} label="Tin đăng" />
-                            <MenuItem icon={<Package size={16} />} label="Đơn hàng" />
-                            <MenuItem icon={<MessageCircle size={16} />} label="Tin nhắn" />
-                            <MenuItem icon={<Star size={16} />} label="Đánh giá" />
+                            <MenuItem
+                                to="/seller"
+                                icon={<LayoutDashboard size={16} />}
+                                label="Dashboard"
+                            />
+                            <MenuItem
+                                to="/seller/listings"
+                                icon={<Bike size={16} />}
+                                label="Tin đăng"
+                            />
+                            <MenuItem
+                                to="/seller/orders"
+                                icon={<Package size={16} />}
+                                label="Đơn hàng"
+                            />
+                            <MenuItem
+                                to="/seller/messages"
+                                icon={<MessageCircle size={16} />}
+                                label="Tin nhắn"
+                            />
+                            <MenuItem
+                                to="/seller/reviews"
+                                icon={<Star size={16} />}
+                                label="Đánh giá"
+                            />
                         </nav>
                     </div>
 
@@ -48,17 +69,19 @@ export default function Header() {
     )
 }
 
-function MenuItem({ icon, label, active }) {
+function MenuItem({ icon, label, to }) {
     return (
-        <button
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
-        ${active
+        <NavLink
+            to={to}
+            className={({ isActive }) =>
+                `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition
+                ${isActive
                     ? "bg-black text-white"
-                    : "text-gray-600 hover:bg-gray-100"}
-      `}
+                    : "text-gray-600 hover:bg-gray-100"}`
+            }
         >
             {icon}
             {label}
-        </button>
+        </NavLink>
     )
 }

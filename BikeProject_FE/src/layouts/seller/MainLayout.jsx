@@ -10,5 +10,4 @@ function MainLayout() {
         </main>
     )
 }
-
 export default MainLayout
