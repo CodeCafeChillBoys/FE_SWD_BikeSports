@@ -2,7 +2,7 @@ function SellerCard({ seller, price }) {
     return (
         <div className="top-6 bg-white rounded-xl border p-6">
             <p className="text-xl font-bold text-blue-600 mb-4">
-                {price.toLocaleString()} đ
+                {price.toLocaleString()}
             </p>
 
             <div className="flex items-center gap-3 mb-4">
