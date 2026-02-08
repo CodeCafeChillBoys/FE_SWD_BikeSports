@@ -26,7 +26,6 @@ function ChatPage() {
                     chatData={chatData}
                     currentUserId={currentUserId}
                 />
-
             </div>
         </div>
     )

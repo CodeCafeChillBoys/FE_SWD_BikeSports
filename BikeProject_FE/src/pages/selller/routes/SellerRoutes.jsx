@@ -5,6 +5,7 @@ import SellerListingsPage from "../Home/SellerListingPage"
 import SellerLayout from "../layouts/sellerLayout"
 import OrderPage from "../Home/OrderPage"
 import ChatPage from "../Home/ChatPage"
+import SellerDetailPage from "../Home/SellerDetailPage"
 
 function SellerRoutes() {
     return (
@@ -18,7 +19,7 @@ function SellerRoutes() {
                 <Route path="listings" element={<SellerListingsPage />} />
                 <Route path="orders" element={<OrderPage />} />
                 <Route path="messages" element={<ChatPage />} />
-                {/* // <Route path="reviews" element={<SellerReviews />} /> */}
+                <Route path="reviews" element={<SellerDetailPage />} />
             </Route>
         </Routes>
     )
