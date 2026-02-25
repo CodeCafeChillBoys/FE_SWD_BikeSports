@@ -34,7 +34,6 @@ export default function SellerListingsPage() {
                 onChange={setTab}
                 counts={counts}
             />
-
             {filteredBikes.map(bike => (
                 <ListingCard key={bike.id} item={bike} />
             ))}

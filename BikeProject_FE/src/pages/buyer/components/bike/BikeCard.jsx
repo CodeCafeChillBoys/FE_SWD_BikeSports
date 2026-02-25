@@ -31,7 +31,6 @@ function BikeCard({ bike }) {
                 <h3 className="font-semibold text-base line-clamp-2">
                     {bike.title}
                 </h3>
-
                 {/* Tags */}
                 <div className="flex gap-2 flex-wrap text-xs">
                     <span className="px-2 py-1 bg-gray-100 rounded-full">

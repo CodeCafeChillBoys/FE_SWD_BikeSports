@@ -13,7 +13,6 @@ function ChatPage() {
                 <h1 className="text-2xl font-bold">Tin nhắn</h1>
             </div>
             <div className="flex h-[600px] border rounded-xl bg-white">
-
                 {/* Cột trái */}
                 <ConversationList
                     conversations={conversations}
@@ -22,7 +21,6 @@ function ChatPage() {
                 />
                 {/* Cột phải */}
                 <ChatWindow conversation={selectedConversation} />
-                
             </div>
         </div>
     )

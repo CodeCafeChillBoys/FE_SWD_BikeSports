@@ -22,3 +22,4 @@ function BikePage() {
 }
 
 export default BikePage
+
