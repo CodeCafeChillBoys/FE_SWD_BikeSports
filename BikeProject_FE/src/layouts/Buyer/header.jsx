@@ -1,5 +1,6 @@
-import { Heart, MessageSquare, Search, ShoppingCart } from "lucide-react";
+import { Heart, LogOut, MessageSquare, Search, ShoppingCart } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { logout } from "../../utils/auth";
 
 export default function Header() {
     return (
@@ -44,14 +45,21 @@ export default function Header() {
                 </nav>
 
                 {/* RIGHT: User */}
-                <div className="flex items-center gap-3">
-                    <img
-                        src="https://i.pravatar.cc/40"
-                        alt="avatar"
-                        className="w-8 h-8 rounded-full object-cover"
-                    />
-                    <span className="text-sm font-medium">Bùi Đăng</span>
+                <div className="flex items-center gap-3 ">
+                    <img src=" https://i.pravatar.cc/40" alt="avatar"
+                        className="w-8 h-8 rounded-full object-cover" />
+                    <span className="text-sm font-medium">Đăng Bùi</span>
                 </div>
+
+                {/* 🔥 Logout */}
+                <button
+                    onClick={logout}
+                    className="flex items-center gap-1 text-red-500 hover:text-red-600 transition text-sm"
+                >
+                    <LogOut size={16} />
+                    Logout
+                </button>
+
 
             </div>
         </header>

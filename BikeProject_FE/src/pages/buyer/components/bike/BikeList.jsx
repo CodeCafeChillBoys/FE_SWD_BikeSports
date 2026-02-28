@@ -7,8 +7,11 @@ function BikeList({ bikes }) {
 
     return (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
-            {bikes.map(bike => (
-                <BikeCard key={bike.id} bike={bike} />
+            {bikes.map((bike) => (
+                <BikeCard
+                    key={bike.productId}
+                    bike={bike}
+                />
             ))}
         </div>
     )

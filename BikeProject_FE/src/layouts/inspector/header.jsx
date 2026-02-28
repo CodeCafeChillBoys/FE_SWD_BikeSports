@@ -1,4 +1,5 @@
-import { Bike, LayoutDashboard, Plus } from "lucide-react";
+import { Bike, LayoutDashboard, LogOut, Plus } from "lucide-react";
+import { logout } from "../../utils/auth";
 
 
 export default function Header() {
@@ -51,6 +52,15 @@ export default function Header() {
                         className="w-8 h-8 rounded-full object-cover" />
                     <span className="text-sm font-medium">Trần Thị Bình</span>
                 </div>
+
+                {/* 🔥 Logout */}
+                <button
+                    onClick={logout}
+                    className="flex items-center gap-1 text-red-500 hover:text-red-600 transition text-sm"
+                >
+                    <LogOut size={16} />
+                    Logout
+                </button>
             </div>
         </header >
     )

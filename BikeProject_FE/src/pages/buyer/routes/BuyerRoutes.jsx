@@ -1,5 +1,5 @@
 
-import { Routes, Route, Navigate } from "react-router-dom"
+import { Routes, Route } from "react-router-dom"
 import BuyerLayout from "../layouts/BuyerLayout"
 import OrdersPage from "../Home/OrdersPage"
 import FavoritesPage from "../Home/FavoritesPage"
@@ -9,8 +9,7 @@ import BikeDetailPage from "../Home/BikeDetailsPage"
 function BuyerRoutes() {
     return (
         <Routes>
-            <Route path="/" element={<Navigate to="/buyer" />} />
-            <Route path="/buyer" element={<BuyerLayout />}>
+            <Route path="/" element={<BuyerLayout />}>
                 <Route index element={<BikePage />} />
                 <Route path="orders" element={<OrdersPage />} />
                 <Route path="favorites" element={<FavoritesPage />} />
