@@ -1,8 +1,12 @@
-import { CalendarDays, Eye, Package, Star } from "lucide-react"
+import { CalendarDays, CreditCard, Eye, Package, Star } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 
 export default function OrderItem({ order }) {
     const navigate = useNavigate()
+
+    const API_BASE_URL =
+        import.meta.env.VITE_API_BASE_URL || 'https://localhost:7247'
+
 
     // Map trạng thái số sang text
     const orderStatusMap = {
@@ -67,6 +71,14 @@ export default function OrderItem({ order }) {
 
             {/* ===== ITEM ===== */}
             <div className="flex gap-4 lg:flex-row lg:items-start">
+                {/* Product Image */}
+                {order.featuredImage && (
+                    <img
+                        src={`${API_BASE_URL}/${order.featuredImage}`}
+                        alt={order.productName}
+                        className="w-24 h-24 object-cover rounded-lg"
+                    />
+                )}
 
                 <div className="flex-1">
                     <h3 className="font-bold text-sm">
@@ -101,6 +113,15 @@ export default function OrderItem({ order }) {
 
             {/* ===== ACTIONS ===== */}
             <div className="flex gap-3 pt-3 border-t">
+                {order.paymentStatus === 1 && (
+                    <button
+                        onClick={() => navigate(`/buyer/payment/${order.orderId}`)}
+                        className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                    >
+                        <CreditCard size={16} /> Thanh toán
+                    </button>
+                )}
+
                 <button
                     onClick={() => navigate(`/orders/${order.orderId}`)}
                     className="flex items-center gap-1 border px-3 py-1 rounded text-sm hover:bg-gray-50"

@@ -1,9 +1,9 @@
 import { Search } from 'lucide-react'
-import bikes from '../../../../mock/bikes';
+import { useMemo } from 'react'
 import Dropdown from './Dropdown'
 
 
-function SearchSection({ filters, setFilters, keyword, setKeyword }) {
+function SearchSection({ filters, setFilters, keyword, setKeyword, bikes = [] }) {
     const updateFilters = (key, value) => {
         setFilters(prev => {
             return {
@@ -18,10 +18,24 @@ function SearchSection({ filters, setFilters, keyword, setKeyword }) {
             keyword: keyword.trim(),
         }))
     }
-    const typeOptions = [...new Set(bikes.map(b => b.type))]
-    const brandOptions = [...new Set(bikes.map(b => b.brand))]
-    const conditionOptions = [...new Set(bikes.map(b => b.condition))]
-    const priceOptions = [...new Set(bikes.map(b => b.price))]
+
+    // Tính options từ dữ liệu xe thực tế
+    const typeOptions = useMemo(() =>
+        [...new Set(bikes.map(b => b.type).filter(Boolean))],
+        [bikes]
+    )
+    const brandOptions = useMemo(() =>
+        [...new Set(bikes.map(b => b.brand || b.sellerName).filter(Boolean))],
+        [bikes]
+    )
+    const conditionOptions = useMemo(() =>
+        [...new Set(bikes.map(b => b.condition).filter(Boolean))],
+        [bikes]
+    )
+    const priceOptions = useMemo(() => {
+        const prices = bikes.map(b => b.price).filter(Boolean)
+        return prices.length > 0 ? [...new Set(prices)].sort((a, b) => a - b) : []
+    }, [bikes])
 
     return (
         <section className="space-y-4">

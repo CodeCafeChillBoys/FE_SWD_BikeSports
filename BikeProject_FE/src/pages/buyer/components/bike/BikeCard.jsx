@@ -3,12 +3,35 @@ import { useNavigate } from 'react-router-dom'
 
 function BikeCard({ bike }) {
     const navigate = useNavigate()
-    const API_BASE_URL =
-        import.meta.env.VITE_API_BASE_URL || 'https://localhost:7247';
 
+    const API_BASE_URL =
+        import.meta.env.VITE_API_BASE_URL || 'https://localhost:7247'
+
+    // Map status
+    const getStatusBadge = () => {
+        if (bike.status === 2) {
+            return (
+                <span className="absolute top-3 left-3 bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                    <ShieldCheck size={14} />
+                    Đã duyệt
+                </span>
+            )
+        }
+
+        if (bike.status === 1) {
+            return (
+                <span className="absolute top-3 left-3 bg-yellow-100 text-yellow-600 text-xs px-2 py-1 rounded-full">
+                    Chờ duyệt
+                </span>
+            )
+        }
+
+        return null
+    }
 
     return (
         <div className="bg-white rounded-2xl shadow hover:shadow-lg transition overflow-hidden">
+
             {/* IMAGE */}
             <div className="relative">
                 <img
@@ -17,15 +40,8 @@ function BikeCard({ bike }) {
                     className="w-full h-56 object-cover"
                 />
 
-                {/* Đã kiểm định */}
-                {bike.inspectionStatus === 1 && (
-                    <span className="absolute top-3 left-3 bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                        <ShieldCheck size={14} />
-                        Đã kiểm định
-                    </span>
-                )}
+                {getStatusBadge()}
 
-                {/* Heart */}
                 <button className="absolute top-3 right-3 bg-white p-2 rounded-full shadow">
                     <Heart size={16} />
                 </button>
@@ -33,38 +49,30 @@ function BikeCard({ bike }) {
 
             {/* CONTENT */}
             <div className="p-4 space-y-3">
+
+                {/* Title (ưu tiên title, fallback productName) */}
                 <h3 className="font-semibold text-base line-clamp-2">
-                    {bike.productName}
+                    {bike.title || bike.productName}
                 </h3>
 
-                {/* Tags */}
-                <div className="flex gap-2 flex-wrap text-xs">
-                    <span className="px-2 py-1 bg-gray-100 rounded-full">
-                        {bike.categoryName}
-                    </span>
-
-                    <span className="px-2 py-1 bg-gray-100 rounded-full">
-                        Condition: {bike.condition}
-                    </span>
-                </div>
-
-                {/* Description */}
-                <p className="text-sm text-gray-500 line-clamp-2">
-                    {bike.description}
+                {/* Seller */}
+                <p className="text-sm text-gray-500">
+                    Người bán: {bike.sellerName}
                 </p>
 
-                {/* Price + views */}
-                <div className="flex justify-between items-center">
-                    <span className="text-blue-600 font-bold">
-                        {bike.price?.toLocaleString()} đ
-                    </span>
+                {/* Approved info */}
+                {bike.status === 2 && (
+                    <p className="text-xs text-gray-400">
+                        Duyệt bởi: {bike.approvedByName}
+                    </p>
+                )}
 
-                    <span className="flex items-center gap-1 text-gray-400 text-sm">
-                        <Eye size={16} />
-                        {bike.viewCount}
-                    </span>
-                </div>
+                {/* Date */}
+                <p className="text-xs text-gray-400">
+                    Đăng ngày: {new Date(bike.createdAt).toLocaleDateString()}
+                </p>
 
+                {/* Button */}
                 <button
                     onClick={() => navigate(`/buyer/bikes/${bike.productId}`)}
                     className="w-full bg-black text-white py-2 rounded-lg hover:opacity-90"
