@@ -16,9 +16,10 @@ const getListingById = (id) => {
 
 // ============================
 // APPROVE LISTING
+// Backend thường yêu cầu body JSON (kể cả rỗng)
 // ============================
-const approveListing = (listingId) => {
-    return apiClient.post(`/Listing/approve/${listingId}`)
+const approveListing = (listingId, payload = {}) => {
+    return apiClient.post(`/Listing/approve/${listingId}`, payload)
 }
 
 // ============================

@@ -1,8 +1,11 @@
 import { Bike, LayoutDashboard, LogOut, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { logout } from "../../utils/auth";
 
 
 export default function Header() {
+    const navigate = useNavigate();
+
     return (
         <header className="h-16 bg-white border-b">
             <div className="px-8 h-full flex  justify-between items-center">
@@ -19,6 +22,7 @@ export default function Header() {
 
                     {/* Dashboard Button */}
                     <button
+                        onClick={() => navigate("/inspector")}
                         className="flex items-center gap-2 
                                    bg-slate-900 text-white
                                    px-6 py-2.5
@@ -33,6 +37,7 @@ export default function Header() {
 
                     {/* Create Inspection */}
                     <button
+                        onClick={() => navigate("/inspector/listings")}
                         className="flex items-center gap-2 
                                    text-sm font-medium
                                    text-gray-700
