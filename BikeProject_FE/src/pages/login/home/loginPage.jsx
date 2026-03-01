@@ -115,7 +115,6 @@ export default function LoginPage() {
                             {error}
                         </div>
                     )}
-
                     <button
                         type="submit"
                         disabled={loading}
