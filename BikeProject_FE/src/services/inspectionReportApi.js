@@ -32,6 +32,26 @@ const inspectionReportApi = {
         return await apiClient.get(
             "/InspectionReport/get-all-inspector-report"
         );
+    },
+
+    // ============================
+    // GET ALL INSPECTOR REPORT BY PRODUCT NAME
+    // GET: /api/InspectionReport/get-all-inspector-report-product-name
+    // ============================
+    getReportsByProductName: async () => {
+        return await apiClient.get(
+            "/InspectionReport/get-all-inspector-report-product-name"
+        );
+    },
+
+    // ============================
+    // GET INSPECTOR REPORT BY ID
+    // GET: /api/InspectionReport/get-all-inspector-report-by-Id/{reportId}
+    // ============================
+    getReportById: async (reportId) => {
+        return await apiClient.get(
+            `/InspectionReport/get-all-inspector-report-by-Id/${reportId}`
+        );
     }
 
 };

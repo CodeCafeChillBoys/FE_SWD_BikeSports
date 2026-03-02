@@ -1,6 +1,6 @@
-import { Eye } from "lucide-react";
+import { Eye, RotateCcw } from "lucide-react";
 
-export default function ListingCard({ item, onView, onUpdateStatus, updatingId }) {
+export default function ListingCard({ item, onViewDetails, onUpdateStatus, updatingId }) {
 
     const API_BASE_URL =
         import.meta.env.VITE_API_BASE_URL || "https://localhost:7247";
@@ -27,11 +27,11 @@ export default function ListingCard({ item, onView, onUpdateStatus, updatingId }
 
                 <div>
                     <h3 className="font-semibold text-gray-900">
-                        Report ID: {item.reportId}
+                        {item.productName ?? 'Sản phẩm'}
                     </h3>
 
                     <p className="text-sm text-gray-500 mt-1">
-                        Product ID: {item.productId}
+                        Ngày kiểm định: {new Date(item.inspectionDate).toLocaleDateString()}
                     </p>
 
                     <div className="flex items-center gap-3 mt-2">
@@ -70,8 +70,7 @@ export default function ListingCard({ item, onView, onUpdateStatus, updatingId }
                         onClick={() => onUpdateStatus?.(item)}
                         disabled={updatingId === item.reportId}
                         className="
-                            px-4 py-2
-                            text-sm
+                            p-2
                             border border-gray-200
                             rounded-lg
                             hover:bg-gray-50
@@ -79,30 +78,32 @@ export default function ListingCard({ item, onView, onUpdateStatus, updatingId }
                             disabled:opacity-60
                             disabled:cursor-not-allowed
                             transition
+                            flex items-center justify-center
                         "
+                        title={item.status === 2 ? "Chuyển về chưa kiểm định" : "Đánh dấu đã kiểm định"}
                     >
-                        {updatingId === item.reportId
-                            ? "Đang cập nhật..."
-                            : item.status === 2
-                                ? "Chuyển về chưa kiểm định"
-                                : "Đánh dấu đã kiểm định"}
+                        {updatingId === item.reportId ? (
+                            <RotateCcw size={16} className="animate-spin" />
+                        ) : (
+                            <RotateCcw size={16} />
+                        )}
                     </button>
 
                     <button
-                        onClick={() => onView(item.reportId)}
+                        onClick={() => onViewDetails?.(item.reportId)}
                         className="
                             flex items-center gap-2
                             px-4 py-2
                             text-sm
-                            border border-gray-200
+                            bg-blue-600
+                            text-white
                             rounded-lg
-                            hover:bg-gray-50
-                            hover:border-gray-300
+                            hover:bg-blue-700
                             transition
                         "
                     >
                         <Eye size={16} />
-                        Chi tiết
+                        Xem Chi Tiết
                     </button>
                 </div>
             </div>

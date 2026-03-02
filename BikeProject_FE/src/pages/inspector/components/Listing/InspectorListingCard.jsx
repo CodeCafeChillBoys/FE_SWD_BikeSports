@@ -56,25 +56,41 @@ export default function InspectorListingCard({
                 )}
 
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => onCreateReport?.(item)}
-                        disabled={creatingId === item.productId}
-                        className="px-4 py-2 text-sm rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                        {creatingId === item.productId
-                            ? "Đang tạo kiểm định..."
-                            : "Tạo kiểm định"}
-                    </button>
+                    {!item.inspection && !item.inspectionDate && (
+                        <button
+                            onClick={() => onCreateReport(item)}
+                            disabled={
+                                creatingId === item.productId ||
+                                item.hasReport
+                            }
+                            className={`px-4 py-2 rounded-lg text-white font-medium transition-all duration-200
+        ${item.hasReport
+                                    ? "bg-gray-400 cursor-not-allowed opacity-60"
+                                    : creatingId === item.productId
+                                        ? "bg-blue-400 cursor-wait"
+                                        : "bg-blue-600 hover:bg-blue-700"
+                                }
+    `}
+                        >
+                            {item.hasReport
+                                ? "Đã tạo kiểm định"
+                                : creatingId === item.productId
+                                    ? "Đang tạo..."
+                                    : "Tạo kiểm định"}
+                        </button>
+                    )}
 
-                    <button
-                        onClick={() =>
-                            navigate(`/inspector/bikes/${item.productId}`)
-                        }
-                        className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full bg-black text-white hover:bg-gray-800 shadow-sm transition"
-                    >
-                        <Eye size={16} />
-                        Xem báo cáo
-                    </button>
+                    {(item.inspection || item.inspectionDate) && (
+                        <button
+                            onClick={() =>
+                                navigate(`/inspector/bikes/${item.productId}`)
+                            }
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm rounded-full bg-black text-white hover:bg-gray-800 shadow-sm transition"
+                        >
+                            <Eye size={16} />
+                            Xem báo cáo
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

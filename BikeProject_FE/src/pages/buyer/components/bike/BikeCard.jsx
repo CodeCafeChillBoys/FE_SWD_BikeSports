@@ -7,21 +7,37 @@ function BikeCard({ bike }) {
     const API_BASE_URL =
         import.meta.env.VITE_API_BASE_URL || 'https://localhost:7247'
 
-    // Map status
+    // Map status: 1 = active | 2 = expired | 3 = rejected | 4 = deleted
     const getStatusBadge = () => {
-        if (bike.status === 2) {
+        if (bike.status === 1) {
             return (
                 <span className="absolute top-3 left-3 bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full flex items-center gap-1">
                     <ShieldCheck size={14} />
-                    Đã duyệt
+                    Hoạt động
                 </span>
             )
         }
 
-        if (bike.status === 1) {
+        if (bike.status === 2) {
             return (
-                <span className="absolute top-3 left-3 bg-yellow-100 text-yellow-600 text-xs px-2 py-1 rounded-full">
-                    Chờ duyệt
+                <span className="absolute top-3 left-3 bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
+                    Hết hạn
+                </span>
+            )
+        }
+
+        if (bike.status === 3) {
+            return (
+                <span className="absolute top-3 left-3 bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">
+                    Từ chối
+                </span>
+            )
+        }
+
+        if (bike.status === 4) {
+            return (
+                <span className="absolute top-3 left-3 bg-red-100 text-red-600 text-xs px-2 py-1 rounded-full">
+                    Đã xóa
                 </span>
             )
         }
@@ -59,13 +75,6 @@ function BikeCard({ bike }) {
                 <p className="text-sm text-gray-500">
                     Người bán: {bike.sellerName}
                 </p>
-
-                {/* Approved info */}
-                {bike.status === 2 && (
-                    <p className="text-xs text-gray-400">
-                        Duyệt bởi: {bike.approvedByName}
-                    </p>
-                )}
 
                 {/* Date */}
                 <p className="text-xs text-gray-400">

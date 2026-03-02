@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom"
 import { useEffect, useState, useCallback, useMemo } from "react"
 import StatsCard from "../components/DashBoard/StatsCard"
 import ListingCard from "../components/Listing/listingCard"
+import CreateReportModal from "../components/modals/CreateReportModal"
+import ReportDetailModal from "../components/modals/ReportDetailModal"
+import UpdateReportModal from "../components/modals/UpdateReportModal"
 import inspectionReportApi from "../../../services/inspectionReportApi"
 
 export default function DashboardPage() {
@@ -17,6 +20,27 @@ export default function DashboardPage() {
     const [showModal, setShowModal] = useState(false)
     const [submitting, setSubmitting] = useState(false)
 
+    const [showDetailModal, setShowDetailModal] = useState(false)
+    const [reportDetails, setReportDetails] = useState(null)
+    const [loadingDetail, setLoadingDetail] = useState(false)
+
+    const [showUpdateModal, setShowUpdateModal] = useState(false)
+    const [reportToUpdate, setReportToUpdate] = useState(null)
+    const [updatingReport, setUpdatingReport] = useState(false)
+
+    const [updateFormData, setUpdateFormData] = useState({
+        overallRating: "",
+        frameCondition: "",
+        frameNotes: "",
+        brakeCondition: "",
+        brakeNotes: "",
+        drivetrainCondition: "",
+        drivetrainNotes: "",
+        wheelCondition: "",
+        wheelNotes: "",
+        status: 1
+    })
+
     const [formData, setFormData] = useState({
         productId: "",
         inspectorId: "",
@@ -27,7 +51,7 @@ export default function DashboardPage() {
     const fetchReports = useCallback(async () => {
         try {
             setLoading(true)
-            const res = await inspectionReportApi.getAllReports()
+            const res = await inspectionReportApi.getReportsByProductName()
             const data = Array.isArray(res)
                 ? res
                 : Array.isArray(res?.data)
@@ -83,35 +107,71 @@ export default function DashboardPage() {
         navigate(`/inspector/report/${id}`)
     }
 
+    // ================= VIEW REPORT DETAILS =================
+    const handleViewDetails = async (reportId) => {
+        try {
+            setLoadingDetail(true)
+            setShowDetailModal(true)
+            const res = await inspectionReportApi.getReportById(reportId)
+            const data = res?.data || res
+            setReportDetails(data)
+        } catch (error) {
+            console.error("Fetch report details error:", error)
+            alert("Lấy chi tiết báo cáo thất bại")
+        } finally {
+            setLoadingDetail(false)
+        }
+    }
+
+    const closeDetailModal = () => {
+        setShowDetailModal(false)
+        setReportDetails(null)
+    }
+
     // ================= UPDATE REPORT STATUS =================
     const handleUpdateStatus = async (report) => {
         if (!report?.reportId) return
 
-        const currentStatus = report.status ?? 1
+        // Open modal for inspection details update
+        setReportToUpdate(report)
 
-        // Map:
-        // 1 = Pending, 2 = Completed, 3 = Rejected
-        let nextStatus
-        if (currentStatus === 1) {
-            nextStatus = 2 // Pending -> Completed
-        } else if (currentStatus === 2) {
-            nextStatus = 1 // Completed -> Pending
-        } else {
-            nextStatus = 1 // Rejected or others -> Pending
-        }
+        const nextStatus = report.status === 1 ? 2 : 1
+
+        setUpdateFormData({
+            overallRating: report.overallRating ?? "",
+            frameCondition: report.frameCondition ?? "",
+            frameNotes: report.frameNotes ?? "",
+            brakeCondition: report.brakeCondition ?? "",
+            brakeNotes: report.brakeNotes ?? "",
+            drivetrainCondition: report.drivetrainCondition ?? "",
+            drivetrainNotes: report.drivetrainNotes ?? "",
+            wheelCondition: report.wheelCondition ?? "",
+            wheelNotes: report.wheelNotes ?? "",
+            status: nextStatus
+        })
+
+        setShowUpdateModal(true)
+    }
+
+    // ================= SUBMIT UPDATE REPORT =================
+    const handleSubmitUpdate = async (e) => {
+        e.preventDefault()
+        if (!reportToUpdate?.reportId) return
 
         try {
-            setUpdatingId(report.reportId)
+            setUpdatingReport(true)
+            setUpdatingId(reportToUpdate.reportId)
 
-            await inspectionReportApi.updateReport(report.reportId, {
-                status: nextStatus
-            })
+            await inspectionReportApi.updateReport(reportToUpdate.reportId, updateFormData)
 
+            setShowUpdateModal(false)
+            setReportToUpdate(null)
             await fetchReports()
         } catch (error) {
-            console.error("Update report status error:", error)
-            alert("Cập nhật trạng thái báo cáo thất bại, vui lòng thử lại.")
+            console.error("Update report error:", error)
+            alert("Cập nhật báo cáo thất bại, vui lòng thử lại.")
         } finally {
+            setUpdatingReport(false)
             setUpdatingId(null)
         }
     }
@@ -130,11 +190,9 @@ export default function DashboardPage() {
                 inspectorId: "",
                 imagesUrl: ""
             })
-
-            fetchReports()
-
+            await fetchReports()
         } catch (error) {
-            console.error("Create report error:", error)
+            console.error("Create report error:", error);
         } finally {
             setSubmitting(false)
         }
@@ -154,15 +212,8 @@ export default function DashboardPage() {
                         Chào mừng trở lại!
                     </p>
                 </div>
-
-                <button
-                    onClick={() => setShowModal(true)}
-                    className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-                >
-                    <Plus size={18} />
-                    Tạo Báo Cáo Mới
-                </button>
             </div>
+
 
             {/* STATS */}
             <div className="grid grid-cols-3 gap-6">
@@ -217,6 +268,7 @@ export default function DashboardPage() {
                             key={item.reportId}
                             item={item}
                             onView={handleView}
+                            onViewDetails={handleViewDetails}
                             onUpdateStatus={handleUpdateStatus}
                             updatingId={updatingId}
                         />
@@ -225,66 +277,32 @@ export default function DashboardPage() {
             </div>
 
             {/* ================= MODAL ================= */}
-            {showModal && (
-                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-                    <div className="bg-white w-[420px] p-6 rounded-2xl shadow-xl relative">
+            <CreateReportModal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                formData={formData}
+                setFormData={setFormData}
+                onSubmit={handleCreateReport}
+                submitting={submitting}
+            />
 
-                        <button
-                            onClick={() => setShowModal(false)}
-                            className="absolute right-4 top-4 text-gray-400 hover:text-black"
-                        >
-                            <X size={20} />
-                        </button>
+            {/* ================= DETAIL MODAL ================= */}
+            <ReportDetailModal
+                isOpen={showDetailModal}
+                onClose={closeDetailModal}
+                reportDetails={reportDetails}
+                loadingDetail={loadingDetail}
+            />
 
-                        <h3 className="text-lg font-semibold mb-5">
-                            Tạo Báo Cáo Mới
-                        </h3>
-
-                        <form onSubmit={handleCreateReport} className="space-y-4">
-
-                            <input
-                                placeholder="Product ID"
-                                value={formData.productId}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, productId: e.target.value })
-                                }
-                                className="w-full border p-2 rounded-lg"
-                                required
-                            />
-
-                            <input
-                                placeholder="Inspector ID"
-                                value={formData.inspectorId}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, inspectorId: e.target.value })
-                                }
-                                className="w-full border p-2 rounded-lg"
-                                required
-                            />
-
-                            <input
-                                placeholder="Image URL"
-                                value={formData.imagesUrl}
-                                onChange={(e) =>
-                                    setFormData({ ...formData, imagesUrl: e.target.value })
-                                }
-                                className="w-full border p-2 rounded-lg"
-                                required
-                            />
-
-                            <button
-                                type="submit"
-                                disabled={submitting}
-                                className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition disabled:opacity-50"
-                            >
-                                {submitting ? "Đang tạo..." : "Tạo Báo Cáo"}
-                            </button>
-
-                        </form>
-                    </div>
-                </div>
-            )}
-
+            {/* ================= UPDATE REPORT MODAL ================= */}
+            <UpdateReportModal
+                isOpen={showUpdateModal}
+                onClose={() => setShowUpdateModal(false)}
+                updateFormData={updateFormData}
+                setUpdateFormData={setUpdateFormData}
+                onSubmit={handleSubmitUpdate}
+                updatingReport={updatingReport}
+            />
         </div>
     )
 }
