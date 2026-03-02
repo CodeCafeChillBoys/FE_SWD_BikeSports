@@ -6,6 +6,7 @@ import SellerLayout from "../layouts/sellerLayout"
 import OrderPage from "../Home/OrderPage"
 import ChatPage from "../Home/ChatPage"
 import SellerDetailPage from "../Home/SellerDetailPage"
+import ProductPage from "../Home/ProductPage"
 
 function SellerRoutes() {
     return (
@@ -14,6 +15,7 @@ function SellerRoutes() {
                 <Route index element={<DashboardPage />} />
                 <Route path="listings/new" element={<CreateListingPage />} />
                 <Route path="listings" element={<SellerListingsPage />} />
+                <Route path="products" element={<ProductPage />} />
                 <Route path="orders" element={<OrderPage />} />
                 <Route path="messages" element={<ChatPage />} />
                 <Route path="reviews" element={<SellerDetailPage />} />

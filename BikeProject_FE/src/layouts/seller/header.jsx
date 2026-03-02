@@ -4,7 +4,8 @@ import {
     Package,
     MessageCircle,
     Star,
-    LogOut
+    LogOut,
+    ShoppingBag
 } from "lucide-react"
 import { NavLink } from "react-router-dom"
 import { logout } from "../../utils/auth"
@@ -37,6 +38,11 @@ export default function Header() {
                                 to="/seller/listings"
                                 icon={<Bike size={16} />}
                                 label="Tin đăng"
+                            />
+                            <MenuItem
+                                to="/seller/products"
+                                icon={<ShoppingBag size={16} />}
+                                label="Sản phẩm"
                             />
                             <MenuItem
                                 to="/seller/orders"
