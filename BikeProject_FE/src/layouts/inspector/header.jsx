@@ -45,9 +45,8 @@ export default function Header() {
                                    transition"
                     >
                         <Plus size={16} />
-                        Tạo kiểm định
+                        Danh sách Sản Phẩm
                     </button>
-
                 </div>
 
 

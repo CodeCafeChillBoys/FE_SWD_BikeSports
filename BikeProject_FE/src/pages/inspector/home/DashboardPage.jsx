@@ -12,6 +12,7 @@ export default function DashboardPage() {
     const [reports, setReports] = useState([])
     const [loading, setLoading] = useState(true)
     const [filterStatus, setFilterStatus] = useState("all")
+    const [updatingId, setUpdatingId] = useState(null)
 
     const [showModal, setShowModal] = useState(false)
     const [submitting, setSubmitting] = useState(false)
@@ -47,12 +48,12 @@ export default function DashboardPage() {
 
     // ================= STATS =================
     const pending = useMemo(
-        () => reports?.filter(r => r?.status === 0).length || 0,
+        () => reports?.filter(r => r?.status === 1).length || 0,
         [reports]
     )
 
     const completed = useMemo(
-        () => reports?.filter(r => r?.status === 1).length || 0,
+        () => reports?.filter(r => r?.status === 2).length || 0,
         [reports]
     )
 
@@ -65,10 +66,10 @@ export default function DashboardPage() {
         let data = [...reports]
 
         if (filterStatus === "pending")
-            data = data.filter(r => r?.status === 0)
+            data = data.filter(r => r?.status === 1)
 
         if (filterStatus === "completed")
-            data = data.filter(r => r?.status === 1)
+            data = data.filter(r => r?.status === 2)
 
         return data
             .sort((a, b) =>
@@ -80,6 +81,39 @@ export default function DashboardPage() {
 
     const handleView = (id) => {
         navigate(`/inspector/report/${id}`)
+    }
+
+    // ================= UPDATE REPORT STATUS =================
+    const handleUpdateStatus = async (report) => {
+        if (!report?.reportId) return
+
+        const currentStatus = report.status ?? 1
+
+        // Map:
+        // 1 = Pending, 2 = Completed, 3 = Rejected
+        let nextStatus
+        if (currentStatus === 1) {
+            nextStatus = 2 // Pending -> Completed
+        } else if (currentStatus === 2) {
+            nextStatus = 1 // Completed -> Pending
+        } else {
+            nextStatus = 1 // Rejected or others -> Pending
+        }
+
+        try {
+            setUpdatingId(report.reportId)
+
+            await inspectionReportApi.updateReport(report.reportId, {
+                status: nextStatus
+            })
+
+            await fetchReports()
+        } catch (error) {
+            console.error("Update report status error:", error)
+            alert("Cập nhật trạng thái báo cáo thất bại, vui lòng thử lại.")
+        } finally {
+            setUpdatingId(null)
+        }
     }
 
     // ================= CREATE REPORT =================
@@ -134,7 +168,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-3 gap-6">
                 <div onClick={() => setFilterStatus("pending")} className="cursor-pointer">
                     <StatsCard
-                        title="Chờ kiểm định"
+                        title="Chưa kiểm định"
                         value={pending}
                         icon={<Clock size={20} />}
                         bgColor="bg-orange-100"
@@ -144,7 +178,7 @@ export default function DashboardPage() {
 
                 <div onClick={() => setFilterStatus("completed")} className="cursor-pointer">
                     <StatsCard
-                        title="Đã hoàn thành"
+                        title="Đã kiểm định"
                         value={completed}
                         icon={<CheckCircle size={20} />}
                         bgColor="bg-green-100"
@@ -183,6 +217,8 @@ export default function DashboardPage() {
                             key={item.reportId}
                             item={item}
                             onView={handleView}
+                            onUpdateStatus={handleUpdateStatus}
+                            updatingId={updatingId}
                         />
                     ))}
                 </div>
