@@ -13,7 +13,7 @@ function BikeGallery({ featuredImage, inspectionStatus }) {
             />
 
             {/* Badge kiểm định */}
-            {inspectionStatus === 1 && (
+            {inspectionStatus === 2 && (
                 <span className="absolute top-3 left-3 bg-green-100 text-green-600 text-xs px-3 py-1 rounded-full shadow flex items-center gap-1">
                     Đã kiểm định
                 </span>

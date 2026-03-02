@@ -9,13 +9,17 @@ export default function OrderItem({ order }) {
 
 
     // Map trạng thái số sang text
+    // order_status: 1 = pending | 2 = confirmed | 3 = paid | 4 = completed | 5 = cancelled | 6 = refunded
     const orderStatusMap = {
-        1: "Đang chờ",
-        2: "Đang xử lý",
-        3: "Hoàn thành",
-        4: "Đã huỷ"
+        1: "Chờ xác nhận",
+        2: "Đã xác nhận",
+        3: "Đã thanh toán",
+        4: "Hoàn thành",
+        5: "Đã hủy",
+        6: "Hoàn tiền"
     }
 
+    // payment_status: 1 = unpaid | 2 = paid
     const paymentStatusMap = {
         1: "Chưa thanh toán",
         2: "Đã thanh toán"
@@ -23,9 +27,11 @@ export default function OrderItem({ order }) {
 
     const statusColor = {
         "Hoàn thành": "bg-green-100 text-green-700",
-        "Đang xử lý": "bg-yellow-100 text-yellow-700",
-        "Đang chờ": "bg-yellow-100 text-yellow-700",
-        "Đã huỷ": "bg-red-100 text-red-700",
+        "Đã thanh toán": "bg-blue-100 text-blue-700",
+        "Đã xác nhận": "bg-yellow-100 text-yellow-700",
+        "Chờ xác nhận": "bg-yellow-100 text-yellow-700",
+        "Đã hủy": "bg-red-100 text-red-700",
+        "Hoàn tiền": "bg-orange-100 text-orange-700"
     }
 
     const formatDate = (value) => {
@@ -113,7 +119,7 @@ export default function OrderItem({ order }) {
 
             {/* ===== ACTIONS ===== */}
             <div className="flex gap-3 pt-3 border-t">
-                {order.paymentStatus === 1 && (
+                {order.paymentStatus === 1 && order.orderStatus !== 5 && order.orderStatus !== 6 && (
                     <button
                         onClick={() => navigate(`/buyer/payment/${order.orderId}`)}
                         className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"

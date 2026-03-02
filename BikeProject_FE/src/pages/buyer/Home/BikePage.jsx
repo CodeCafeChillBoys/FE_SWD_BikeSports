@@ -24,12 +24,12 @@ function BikePage() {
                 console.log('API Response:', res)
                 console.log('All listings:', data)
 
-                // Chỉ hiển thị listing đã duyệt
-                const approvedOnly = data.filter(x => x.status === 2)
-                console.log('Approved listings (status=2):', approvedOnly)
-                console.log('Total: All=' + data.length + ', Approved=' + approvedOnly.length)
+                // Chỉ hiển thị listing đã hoạt động (status = 1)
+                const activeOnly = data.filter(x => x.status === 1)
+                console.log('Active listings (status=1):', activeOnly)
+                console.log('Total: All=' + data.length + ', Active=' + activeOnly.length)
 
-                setBikes(approvedOnly)
+                setBikes(activeOnly)
             } catch (error) {
                 console.error("Fetch listings error:", error)
             } finally {
