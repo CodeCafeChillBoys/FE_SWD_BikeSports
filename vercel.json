@@ -1,5 +1,0 @@
-{
-    "installCommand": "cd BikeProject_FE && npm install",
-    "buildCommand": "cd BikeProject_FE && npm run build",
-    "outputDirectory": "BikeProject_FE/dist"
-}
