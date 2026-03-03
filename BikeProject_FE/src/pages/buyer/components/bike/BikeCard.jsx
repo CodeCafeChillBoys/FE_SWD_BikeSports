@@ -7,7 +7,7 @@ function BikeCard({ bike }) {
     const API_BASE_URL =
         import.meta.env.VITE_API_BASE_URL || 'https://localhost:7247'
 
-    // Map status: 1 = active | 2 = expired | 3 = rejected | 4 = deleted
+    // Map status: 1 = active | 2 = pending | 3 = rejected | 4 = deleted
     const getStatusBadge = () => {
         if (bike.status === 1) {
             return (
@@ -21,7 +21,7 @@ function BikeCard({ bike }) {
         if (bike.status === 2) {
             return (
                 <span className="absolute top-3 left-3 bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                    Hết hạn
+                    Đang chờ
                 </span>
             )
         }

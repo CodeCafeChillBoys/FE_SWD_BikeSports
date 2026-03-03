@@ -9,6 +9,7 @@ import LoginPage from './pages/login/home/loginPage'
 import UnauthorizedPage from './pages/unauthorized/UnauthorizedPage'
 import ProtectedRoute from './routes/ProtectedRoute'
 import HomePage from './pages/home/HomePage'
+import VnPayReturn from './pages/buyer/Home/VnPayReturn'
 
 function App() {
   return (
@@ -20,6 +21,8 @@ function App() {
         <Route path="/home" element={<Navigate to="/" />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        <Route path="/vnpay-return" element={<VnPayReturn />} />
+        <Route path="/buyer/vnpay-return" element={<VnPayReturn />} />
 
         {/* BUYER */}
         <Route

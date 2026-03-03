@@ -1,8 +1,11 @@
-import { CalendarDays, CreditCard, Eye, Package, Star } from "lucide-react"
+import { useState } from "react"
+import { CalendarDays, CreditCard, Eye, Loader2, Package, Star } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import vnpayAPI from "../../../../services/vnpayAPI"
 
 export default function OrderItem({ order }) {
     const navigate = useNavigate()
+    const [paying, setPaying] = useState(false)
 
     const API_BASE_URL =
         import.meta.env.VITE_API_BASE_URL || 'https://localhost:7247'
@@ -41,6 +44,66 @@ export default function OrderItem({ order }) {
 
     const formatMoney = (value) => {
         return value?.toLocaleString("vi-VN") + " đ"
+    }
+
+    // ============================
+    // VNPAY PAYMENT HANDLER
+    // ============================
+
+    // Tìm URL trong response (duyệt tất cả fields)
+    const findPaymentUrl = (obj) => {
+        if (!obj) return null
+        if (typeof obj === "string" && obj.startsWith("http")) return obj
+        if (typeof obj === "object") {
+            for (const key of Object.keys(obj)) {
+                const val = obj[key]
+                if (typeof val === "string" && val.startsWith("http")) return val
+                if (typeof val === "object" && val !== null) {
+                    const nested = findPaymentUrl(val)
+                    if (nested) return nested
+                }
+            }
+        }
+        return null
+    }
+
+    const handleVnPayPayment = async () => {
+        try {
+            setPaying(true)
+
+            const paymentData = {
+                orderId: order.orderId,
+                fullName: order.fullName,
+                description: `Thanh toán đơn hàng #${order.orderId?.slice(0, 8)}`,
+                amount: order.subtotal,
+                createdDate: new Date().toISOString(),
+                returnUrl: `${globalThis.location.origin}/vnpay-return`,
+            }
+
+            console.log("💳 VnPay Payment Data:", paymentData)
+
+            const response = await vnpayAPI.createPayment(paymentData)
+            console.log("💳 VnPay Response:", response)
+            console.log("💳 VnPay Response type:", typeof response)
+            console.log("💳 VnPay Response keys:", typeof response === "object" ? Object.keys(response) : "N/A")
+            console.log("💳 VnPay Response stringified:", JSON.stringify(response))
+
+            // Tìm URL thanh toán trong response
+            const paymentUrl = findPaymentUrl(response)
+
+            if (paymentUrl) {
+                console.log("✅ Found payment URL:", paymentUrl)
+                globalThis.location.href = paymentUrl
+            } else {
+                console.warn("⚠️ Không tìm thấy URL thanh toán trong response:", JSON.stringify(response))
+                alert("Không thể tạo link thanh toán. Vui lòng thử lại!")
+            }
+        } catch (error) {
+            console.error("❌ VnPay Payment Error:", error)
+            alert("Thanh toán thất bại. Vui lòng thử lại!")
+        } finally {
+            setPaying(false)
+        }
     }
 
     const statusText = orderStatusMap[order.orderStatus] || "Không xác định"
@@ -121,10 +184,19 @@ export default function OrderItem({ order }) {
             <div className="flex gap-3 pt-3 border-t">
                 {order.paymentStatus === 1 && order.orderStatus !== 5 && order.orderStatus !== 6 && (
                     <button
-                        onClick={() => navigate(`/buyer/payment/${order.orderId}`)}
-                        className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+                        onClick={handleVnPayPayment}
+                        disabled={paying}
+                        className="flex items-center gap-1 bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        <CreditCard size={16} /> Thanh toán
+                        {paying ? (
+                            <>
+                                <Loader2 size={16} className="animate-spin" /> Đang xử lý...
+                            </>
+                        ) : (
+                            <>
+                                <CreditCard size={16} /> Thanh toán
+                            </>
+                        )}
                     </button>
                 )}
 
