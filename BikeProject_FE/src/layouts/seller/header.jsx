@@ -2,15 +2,33 @@ import {
     LayoutDashboard,
     Bike,
     Package,
-    MessageCircle,
-    Star,
     LogOut,
     ShoppingBag
 } from "lucide-react"
 import { NavLink } from "react-router-dom"
 import { logout } from "../../utils/auth"
+import { useEffect, useState } from "react";
 
 export default function Header() {
+    const [user, setUser] = useState(null)
+
+    useEffect(() => {
+        // Lấy thông tin user từ localStorage
+        const userData = localStorage.getItem("user")
+        const fullName = localStorage.getItem("fullName")
+
+        if (userData) {
+            try {
+                setUser(JSON.parse(userData));
+            } catch (e) {
+                setUser({ name: fullName || "User" })
+            }
+        } else if (fullName) {
+            setUser({ name: fullName })
+        }
+    }, [])
+
+
     return (
         <header className="w-full bg-white border-b">
             <div className="max-w-7xl mx-auto px-6">
@@ -49,27 +67,17 @@ export default function Header() {
                                 icon={<Package size={16} />}
                                 label="Đơn hàng"
                             />
-                            <MenuItem
-                                to="/seller/messages"
-                                icon={<MessageCircle size={16} />}
-                                label="Tin nhắn"
-                            />
-                            <MenuItem
-                                to="/seller/reviews"
-                                icon={<Star size={16} />}
-                                label="Đánh giá"
-                            />
                         </nav>
                     </div>
 
                     {/* Right */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 px-4 py-2 rounded-lg hover:bg-gray-50 transition">
                         <img
-                            src="https://i.pravatar.cc/40"
+                            src={user?.avatar || "https://i.pravatar.cc/40"}
                             alt="avatar"
                             className="w-8 h-8 rounded-full object-cover"
                         />
-                        <span className="text-sm font-medium">Trần Thị Bình</span>
+                        <span className="text-sm font-medium text-gray-700">{user?.name || "User"}</span>
                     </div>
 
                     {/* 🔥 Logout */}

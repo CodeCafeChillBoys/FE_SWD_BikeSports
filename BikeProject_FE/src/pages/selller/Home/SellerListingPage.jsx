@@ -13,9 +13,13 @@ export default function SellerListingsPage() {
     const [error, setError] = useState("")
 
     useEffect(() => {
-        setLoading(true)
-        listingApi.getAllListings()
-            .then((res) => {
+        let mounted = true
+
+        const loadListings = async () => {
+            try {
+                if (mounted) setLoading(true)
+
+                const res = await listingApi.getAllListings()
                 // api.js response interceptor trả về response.data trực tiếp
                 let list = []
                 if (Array.isArray(res)) {
@@ -29,24 +33,32 @@ export default function SellerListingsPage() {
                 const filtered = sellerId
                     ? list.filter((l) => l.sellerId === sellerId)
                     : list
-                setListings(filtered)
-            })
-            .catch(() => setError("Không thể tải danh sách tin đăng."))
-            .finally(() => setLoading(false))
-    }, [sellerId])
+                if (mounted) setListings(filtered)
+            } catch (e) {
+                if (mounted) setError("Không thể tải danh sách tin đăng.")
+                console.log(e);
 
-    const getStatus = (l) => String(l.status ?? "").toLowerCase()
+            } finally {
+                if (mounted) setLoading(false)
+            }
+        }
+
+        loadListings()
+
+        return () => { mounted = false }
+    }, [sellerId])
 
     const filteredListings = listings.filter((l) => {
         if (tab === "all") return true
-        return getStatus(l) === tab
+        return Number(l.status) === tab
     })
 
     const counts = {
         all: listings.length,
-        active: listings.filter((l) => getStatus(l) === "active").length,
-        pending: listings.filter((l) => getStatus(l) === "pending").length,
-        rejected: listings.filter((l) => getStatus(l) === "rejected").length,
+        1: listings.filter((l) => Number(l.status) === 1).length,
+        2: listings.filter((l) => Number(l.status) === 2).length,
+        3: listings.filter((l) => Number(l.status) === 3).length,
+        4: listings.filter((l) => Number(l.status) === 4).length,
     }
 
     return (

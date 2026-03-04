@@ -1,95 +1,147 @@
-import bikes from "../../../../mock/bikes"
 
-function OrderCard({ order, onConfirm }) {
-    const bike = bikes.find((b) => b.id === order.bikeId)
+import { useState } from "react"
+import { CalendarDays, Package, Eye } from "lucide-react"
+import OrderDetailDialog from "./OrderDetailDialog"
 
-    const statusStyle = {
-        "Đang chờ": "bg-yellow-100 text-yellow-700",
-        "Hoàn thành": "bg-green-100 text-green-700",
-        "Đã huỷ": "bg-red-100 text-red-700",
+function OrderCard({ order }) {
+    const [dialogOpen, setDialogOpen] = useState(false)
+
+    const API_BASE_URL =
+        import.meta.env.VITE_API_BASE_URL || 'https://localhost:7247'
+
+    const orderStatusMap = {
+        1: "Chờ xác nhận",
+        2: "Đã xác nhận",
+        3: "Đã thanh toán",
+        4: "Hoàn thành",
+        5: "Đã hủy",
+        6: "Hoàn tiền"
     }
 
+    const paymentStatusMap = {
+        1: "Chưa thanh toán",
+        2: "Đã thanh toán"
+    }
+
+    const statusColor = {
+        "Hoàn thành": "bg-green-100 text-green-700",
+        "Đã thanh toán": "bg-blue-100 text-blue-700",
+        "Đã xác nhận": "bg-yellow-100 text-yellow-700",
+        "Chờ xác nhận": "bg-yellow-100 text-yellow-700",
+        "Đã hủy": "bg-red-100 text-red-700",
+        "Hoàn tiền": "bg-orange-100 text-orange-700"
+    }
+
+    const formatDate = (value) => {
+        if (!value) return "Chưa hoàn thành"
+        return new Date(value).toLocaleDateString("vi-VN")
+    }
+
+    const formatMoney = (value) => {
+        if (value == null) return "0 đ"
+        return value.toLocaleString("vi-VN") + " đ"
+    }
+
+    const statusText = orderStatusMap[order.orderStatus] || "Không xác định"
+    const shortOrderId = order.orderId?.slice(0, 8) || order.orderId
+
     return (
-        <div className="border rounded-xl p-6 bg-white">
-            {/* Header */}
-            <div className="flex justify-between items-center mb-2">
-                <h3 className="font-semibold">Đơn hàng #{order.id}</h3>
-                <span
-                    className={`text-sm px-2 py-0.5 rounded-full ${statusStyle[order.status] || "bg-gray-100 text-gray-600"
-                        }`}
-                >
-                    {order.status}
-                </span>
-            </div>
+        <div className="border rounded-2xl p-6 bg-white space-y-4">
 
-            <p className="text-sm text-gray-500 mb-4">
-                📅 {order.orderDate}
-            </p>
+            {/* ===== HEADER ===== */}
+            <div className="flex gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex items-center gap-2">
+                    <Package size={16} className="text-gray-500" />
+                    <span className="font-semibold text-sm">
+                        Đơn hàng #{shortOrderId}
+                    </span>
 
-            {/* Bike + Payment */}
-            <div className="flex gap-4">
-                {/* Image */}
-                <img
-                    src={bike?.images?.[0]}
-                    alt={order.title}
-                    className="w-24 h-24 rounded-lg object-cover border"
-                />
+                    <span
+                        className={`text-xs px-2 py-0.5 rounded-full ${statusColor[statusText] || "bg-gray-100 text-gray-600"
+                            }`}
+                    >
+                        {statusText}
+                    </span>
+                </div>
 
-                {/* Info */}
-                <div className="flex-1">
-                    <p className="font-medium">{order.title}</p>
-
-                    {bike && (
-                        <p className="text-sm text-gray-500 mt-0.5">
-                            {bike.brand} • {bike.type} • Size {bike.frameSize}
-                        </p>
-                    )}
-
-                    <div className="mt-2 text-sm space-y-1">
-                        <p>
-                            Tổng tiền:{" "}
-                            <span className="font-semibold text-blue-600">
-                                {order.payment.total.toLocaleString()} đ
-                            </span>
-                        </p>
-                        <p>Đặt cọc: {order.payment.deposit.toLocaleString()} đ</p>
-                        <p>Thanh toán: {order.payment.method}</p>
-                        <p>Trạng thái TT: {order.payment.status}</p>
-                    </div>
-
-                    {order.status === "Hoàn thành" && order.completedDate && (
-                        <p className="text-sm text-gray-500 mt-2">
-                            ✅ Hoàn thành ngày: {order.completedDate}
-                        </p>
-                    )}
+                <div className="flex items-center gap-4 text-xs text-gray-500">
+                    <span className="flex items-center gap-1">
+                        <CalendarDays size={14} />
+                        {formatDate(order.createdAt)}
+                    </span>
                 </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex justify-end gap-3 mt-5">
-                {order.status !== "Đã huỷ" && (
-                    <button className="border px-3 py-1.5 rounded-lg text-sm">
-                        Nhắn tin
-                    </button>
+            {/* ===== ITEM ===== */}
+            <div className="flex gap-4 lg:flex-row lg:items-start">
+                {/* Product Image */}
+                {order.featuredImage && (
+                    <img
+                        src={`${API_BASE_URL}/${order.featuredImage}`}
+                        alt={order.productName}
+                        className="w-24 h-24 object-cover rounded-lg border"
+                    />
                 )}
 
-                {order.status === "Đang chờ" && (
-                    <button
-                        onClick={() => onConfirm(order.id)}
-                        className="bg-black text-white px-4 py-1.5 rounded-lg text-sm"
-                    >
-                        Xác nhận đơn hàng
-                    </button>
-                )}
+                {/* Info */}
+                <div className="flex-1">
+                    <h3 className="font-bold text-sm">
+                        {order.productName}
+                    </h3>
 
-                {order.status === "Hoàn thành" && (
-                    <span className="text-green-600 text-sm font-medium">
+                    <p className="text-xs text-gray-500 mt-1">
+                        Người mua: {order.fullName}
+                    </p>
+
+                    <p className="text-xs text-gray-500">
+                        Số lượng: {order.quantity}
+                    </p>
+
+                    <p className="text-xs text-gray-500">
+                        Đơn giá: {formatMoney(order.unitPrice)}
+                    </p>
+                </div>
+
+                {/* Payment Info */}
+                <div className="min-w-[170px] lg:text-right space-y-1 text-xs">
+                    <p className="text-gray-500">Tổng tiền</p>
+                    <p className="font-semibold text-blue-600">
+                        {formatMoney(order.subtotal)}
+                    </p>
+
+                    <p className="text-gray-500">Thanh toán</p>
+                    <p className="font-semibold text-green-600">
+                        {paymentStatusMap[order.paymentStatus] || "Không xác định"}
+                    </p>
+                </div>
+            </div>
+
+            {/* ===== ACTIONS ===== */}
+            <div className="flex justify-end gap-3 pt-3 border-t">
+                <button
+                    onClick={() => setDialogOpen(true)}
+                    className="flex items-center gap-1.5 border px-3 py-1.5 rounded-lg text-sm hover:bg-gray-50 cursor-pointer"
+                >
+                    <Eye size={14} />
+                    Xem chi tiết
+                </button>
+
+                {order.orderStatus === 4 && (
+                    <span className="text-green-600 text-sm font-medium flex items-center">
                         ✔ Đã hoàn tất
                     </span>
                 )}
             </div>
+
+            {/* Detail Dialog */}
+            <OrderDetailDialog
+                orderId={order.orderId}
+                open={dialogOpen}
+                onOpenChange={setDialogOpen}
+            />
         </div>
     )
 }
 
 export default OrderCard
+

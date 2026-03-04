@@ -39,9 +39,42 @@ export default function ProductForm({ product, sellerId, onClose }) {
         price: 0,
         stockQuantity: 1,
         locationCity: "",
-        status: 0,
-        inspectionStatus: 0
+        // Default to pending approval + not inspected according to new schema
+        status: 5,
+        inspectionStatus: 1
     })
+
+    const parseNumber = (value, fallback = 0) => {
+        const parsed = Number(value)
+        return Number.isFinite(parsed) ? parsed : fallback
+    }
+
+    const buildPayload = () => {
+        // Backend expects flat structure with specific data types per Swagger
+        return {
+            sellerId: String(formData.sellerId || sellerId),
+            categoryId: String(formData.categoryId),
+            brandId: String(formData.brandId),
+            productName: formData.productName || "",
+            description: formData.description || "",
+            condition: parseNumber(formData.condition, 2),
+            frameSize: formData.frameSize || "",
+            frameMaterial: parseNumber(formData.frameMaterial, 0),
+            wheelSize: formData.wheelSize || "",
+            brakeType: formData.brakeType || "",
+            gearSystem: formData.gearSystem || "",
+            weight: parseNumber(formData.weight, 0),
+            color: formData.color || "",
+            yearOfManufacture: parseNumber(formData.yearOfManufacture, new Date().getFullYear()),
+            usageHistory: parseNumber(formData.usageHistory, 0),
+            price: parseNumber(formData.price, 0),
+            stockQuantity: parseNumber(formData.stockQuantity, 1),
+            locationCity: formData.locationCity || ""
+            ,
+            status: parseNumber(formData.status, 5),
+            inspectionStatus: parseNumber(formData.inspectionStatus, 1)
+        }
+    }
 
     // Load dữ liệu sản phẩm nếu đang edit
     useEffect(() => {
@@ -88,6 +121,10 @@ export default function ProductForm({ product, sellerId, onClose }) {
             setError("Tên sản phẩm không được để trống")
             return
         }
+        if (!sellerId) {
+            setError("Không tìm thấy tài khoản seller. Vui lòng đăng nhập lại")
+            return
+        }
         if (!formData.categoryId || !formData.brandId) {
             setError("Vui lòng chọn danh mục và thương hiệu")
             return
@@ -97,23 +134,105 @@ export default function ProductForm({ product, sellerId, onClose }) {
             return
         }
 
+        const payload = buildPayload()
+
+        console.log("🚀 Payload gửi lên backend:", JSON.stringify(payload, null, 2))
+
+        if (!payload.categoryId || !payload.brandId) {
+            setError("Vui lòng nhập danh mục và thương hiệu")
+            return
+        }
+        if (!payload.sellerId) {
+            setError("sellerId không hợp lệ")
+            return
+        }
+
         try {
             setLoading(true)
 
+            let successMessage = ""
+            let newProductData = null
+
             if (isEditing) {
                 // Update product
-                await productApi.updateProduct(product.productId, formData)
-                alert("Cập nhật sản phẩm thành công!")
+                const response = await productApi.updateProduct(product.productId, payload)
+                console.log("✅ Update response:", response)
+                successMessage = "Cập nhật sản phẩm thành công!"
             } else {
                 // Create new product
-                await productApi.createBicycle(formData)
-                alert("Tạo sản phẩm mới thành công!")
+                const response = await productApi.createBicycle(payload)
+                console.log("✅ Create response:", response)
+
+                // Parse response to get new product data. apiClient returns response.data via interceptor,
+                // but different backends may return only a message or nested object. Normalize here and
+                // fall back to form values so the UI can show the created item immediately.
+                const raw = response?.data || response || {}
+                const normalized = {
+                    // prefer server-provided fields
+                    productId: raw.productId ?? raw.id ?? raw.productId ?? null,
+                    productName: raw.productName ?? formData.productName,
+                    sellerId: raw.sellerId ?? payload.sellerId ?? sellerId,
+                    categoryId: raw.categoryId ?? payload.categoryId,
+                    brandId: raw.brandId ?? payload.brandId,
+                    description: raw.description ?? formData.description,
+                    condition: raw.condition ?? payload.condition,
+                    frameSize: raw.frameSize ?? formData.frameSize,
+                    frameMaterial: raw.frameMaterial ?? payload.frameMaterial,
+                    wheelSize: raw.wheelSize ?? formData.wheelSize,
+                    brakeType: raw.brakeType ?? formData.brakeType,
+                    gearSystem: raw.gearSystem ?? formData.gearSystem,
+                    weight: raw.weight ?? formData.weight,
+                    color: raw.color ?? formData.color,
+                    yearOfManufacture: raw.yearOfManufacture ?? formData.yearOfManufacture,
+                    usageHistory: raw.usageHistory ?? formData.usageHistory,
+                    price: raw.price ?? formData.price,
+                    stockQuantity: raw.stockQuantity ?? formData.stockQuantity,
+                    locationCity: raw.locationCity ?? formData.locationCity,
+                    status: raw.status ?? payload.status,
+                    inspectionStatus: raw.inspectionStatus ?? payload.inspectionStatus
+                }
+
+                // If backend didn't return an id, add a client-side local id so we can
+                // track this pending product uniquely in localStorage.
+                if (!normalized.productId) {
+                    normalized._localId = `local-${Date.now()}-${Math.floor(Math.random() * 10000)}`
+                }
+
+                newProductData = normalized
+                console.log("🆕 New product data (normalized):", newProductData)
+
+                successMessage = "Tạo sản phẩm mới thành công! Sản phẩm đang chờ admin duyệt."
+            }
+            // If backend returned a real productId, record it so listing flow can pick it
+            try {
+                if (newProductData?.productId) {
+                    localStorage.setItem('lastCreatedProductId', String(newProductData.productId))
+                    localStorage.setItem('lastCreatedProduct', JSON.stringify(newProductData))
+                } else {
+                    // still save normalized object for UI convenience
+                    localStorage.setItem('lastCreatedProduct', JSON.stringify(newProductData))
+                }
+            } catch (lsErr) {
+                console.warn('Could not save lastCreatedProduct to localStorage', lsErr)
             }
 
-            onClose(true) // true = refresh danh sách
+            onClose(true, successMessage, newProductData) // Pass new product data
         } catch (err) {
             console.error("Lỗi khi lưu sản phẩm:", err)
-            setError(err.response?.data?.message || "Có lỗi xảy ra khi lưu sản phẩm")
+
+            // Parse backend validation errors
+            const responseData = err.response?.data
+            if (responseData?.errors) {
+                const errorMessages = []
+                Object.entries(responseData.errors).forEach(([field, messages]) => {
+                    if (Array.isArray(messages)) {
+                        messages.forEach(msg => errorMessages.push(`${field}: ${msg}`))
+                    }
+                })
+                setError(errorMessages.length > 0 ? errorMessages.join('\n') : "Có lỗi xảy ra khi lưu sản phẩm")
+            } else {
+                setError(responseData?.message || responseData?.title || "Có lỗi xảy ra khi lưu sản phẩm")
+            }
         } finally {
             setLoading(false)
         }
@@ -135,7 +254,7 @@ export default function ProductForm({ product, sellerId, onClose }) {
                 </div>
 
                 {error && (
-                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm whitespace-pre-line">
                         {error}
                     </div>
                 )}
@@ -164,12 +283,13 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 Danh mục <span className="text-red-500">*</span>
                             </label>
                             <input
-                                type="text"
+                                type="number"
                                 name="categoryId"
                                 value={formData.categoryId}
                                 onChange={handleChange}
                                 className="w-full border rounded-lg px-4 py-2"
                                 placeholder="ID Danh mục (VD: 1)"
+                                min="1"
                                 required
                             />
                         </div>
@@ -179,12 +299,13 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 Thương hiệu <span className="text-red-500">*</span>
                             </label>
                             <input
-                                type="text"
+                                type="number"
                                 name="brandId"
                                 value={formData.brandId}
                                 onChange={handleChange}
                                 className="w-full border rounded-lg px-4 py-2"
                                 placeholder="ID Thương hiệu (VD: 1)"
+                                min="1"
                                 required
                             />
                         </div>
