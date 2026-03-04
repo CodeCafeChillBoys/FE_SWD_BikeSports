@@ -4,6 +4,9 @@ export const userAPI = {
     search: (params = {}) =>
         apiClient.get('/User/get-user-by-search-filter', { params }),
 
+    getById: (userId) =>
+        apiClient.get(`/User/${userId}`),
+
     update: (userId, data) =>
         apiClient.put(`/User/${userId}`, data),
 
