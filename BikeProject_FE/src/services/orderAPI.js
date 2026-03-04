@@ -61,6 +61,22 @@ const orderAPI = {
     },
 
     // ============================
+    // GET ORDER BY SELLER ID
+    // ============================
+    getOrderBySeller: async (sellerId) => {
+        try {
+            const endpoint = `/Order/get-order-by-seller/${sellerId}`;
+            console.log("🌐 Calling endpoint:", endpoint);
+            const response = await apiClient.get(endpoint);
+            console.log("✅ API Response received:", response);
+            return response;
+        } catch (error) {
+            console.error("❌ Get Order By Seller Error:", error);
+            throw error;
+        }
+    },
+
+    // ============================
     // UPDATE ORDER
     // ============================
     updateOrder: async (orderId, updateData) => {

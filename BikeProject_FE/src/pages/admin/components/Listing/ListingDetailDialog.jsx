@@ -1,0 +1,220 @@
+import { useEffect, useState } from "react"
+import { Loader2, CalendarDays, User, Tag, FileText, MapPin, Gauge, Palette, Settings, Shield } from "lucide-react"
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "../../../../components/ui/dialog"
+import { Badge } from "../../../../components/ui/badge"
+import listingApi from "../../../../services/listingAPI"
+import productApi from "../../../../services/productApi"
+
+// ===== STATUS MAPS =====
+const LISTING_STATUS = {
+    1: { label: "Đang hiển thị", variant: "success" },
+    2: { label: "Hết hạn", variant: "secondary" },
+    3: { label: "Từ chối", variant: "destructive" },
+    4: { label: "Đã xóa", variant: "secondary" },
+    active: { label: "Đang hiển thị", variant: "success" },
+    expired: { label: "Hết hạn", variant: "secondary" },
+    rejected: { label: "Từ chối", variant: "destructive" },
+    deleted: { label: "Đã xóa", variant: "secondary" },
+}
+
+const CONDITION_MAP = { 1: "Mới", 2: "Đã sử dụng", 3: "Tân trang" }
+const FRAME_MATERIAL_MAP = { 1: "Carbon", 2: "Nhôm", 3: "Thép", 4: "Titanium", 5: "Hợp kim" }
+const PRODUCT_STATUS_MAP = {
+    1: { label: "Có sẵn", variant: "success" },
+    2: { label: "Đã bán", variant: "secondary" },
+    3: { label: "Đã đặt", variant: "warning" },
+    4: { label: "Đã ẩn", variant: "secondary" },
+    5: { label: "Chờ duyệt", variant: "warning" },
+    6: { label: "Từ chối", variant: "destructive" },
+}
+const INSPECTION_MAP = { 1: "Chưa kiểm định", 2: "Đã kiểm định" }
+
+export default function ListingDetailDialog({ listingId, open, onOpenChange }) {
+    const [listing, setListing] = useState(null)
+    const [product, setProduct] = useState(null)
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
+
+    const API_BASE_URL =
+        import.meta.env.VITE_API_BASE_URL || 'https://localhost:7247'
+
+    useEffect(() => {
+        if (!open || !listingId) return
+
+        const fetchDetail = async () => {
+            try {
+                setLoading(true)
+                setError(null)
+
+                // 1. Fetch listing
+                const listingRes = await listingApi.getListingById(listingId)
+                console.log("📦 Listing Detail:", listingRes)
+                setListing(listingRes)
+
+                // 2. Fetch product detail using productId from listing
+                if (listingRes?.productId) {
+                    try {
+                        const productRes = await productApi.getProductDetail(listingRes.productId)
+                        console.log("� Product Detail:", productRes)
+                        setProduct(productRes)
+                    } catch (e) {
+                        console.warn("Could not fetch product detail", e)
+                    }
+                }
+            } catch (err) {
+                console.error("❌ Fetch listing detail error:", err)
+                setError("Không thể tải thông tin tin đăng.")
+            } finally {
+                setLoading(false)
+            }
+        }
+
+        fetchDetail()
+    }, [open, listingId])
+
+    const formatDate = (value) => {
+        if (!value) return "—"
+        return new Date(value).toLocaleDateString("vi-VN")
+    }
+
+    const formatMoney = (value) => {
+        if (value == null) return "—"
+        return Number(value).toLocaleString("vi-VN") + " đ"
+    }
+
+    const listingStatus = LISTING_STATUS[listing?.status] || LISTING_STATUS[String(listing?.status).toLowerCase()] || { label: String(listing?.status), variant: "secondary" }
+    const image = product?.featuredImage || listing?.featuredImage
+
+    return (
+        <Dialog open={open} onOpenChange={onOpenChange}>
+            <DialogContent className="sm:max-w-[640px] max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle className="flex items-center gap-2">
+                        <FileText size={18} />
+                        Chi tiết tin đăng
+                    </DialogTitle>
+                    <DialogDescription>
+                        #{(listingId || "").toString().slice(0, 8)}
+                    </DialogDescription>
+                </DialogHeader>
+
+                {loading ? (
+                    <div className="flex items-center justify-center py-12 text-gray-400">
+                        <Loader2 size={24} className="animate-spin mr-2" />
+                        Đang tải...
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-8 text-red-500">{error}</div>
+                ) : listing ? (
+                    <div className="space-y-5">
+                        {/* Image */}
+                        {image && (
+                            <img
+                                src={image.startsWith("http") ? image : `${API_BASE_URL}/${image}`}
+                                alt={listing.title}
+                                className="w-full h-52 object-cover rounded-xl border"
+                                onError={(e) => { e.target.src = "https://placehold.co/600x200?text=No+Image" }}
+                            />
+                        )}
+
+                        {/* Title + Listing Status */}
+                        <div className="flex items-start justify-between gap-3">
+                            <h3 className="text-lg font-semibold">{listing.title || product?.productName || "Không có tiêu đề"}</h3>
+                            <Badge variant={listingStatus.variant}>{listingStatus.label}</Badge>
+                        </div>
+
+                        {/* Description */}
+                        {(product?.description || listing?.description) && (
+                            <p className="text-sm text-gray-600 leading-relaxed">
+                                {product?.description || listing?.description}
+                            </p>
+                        )}
+
+                        {/* ===== PRODUCT INFO ===== */}
+                        {product && (
+                            <>
+                                {/* Basic Info */}
+                                <div className="grid grid-cols-2 gap-4 bg-gray-50 rounded-xl p-4">
+                                    <InfoItem icon={<Tag size={14} />} label="Giá" value={formatMoney(product.price)} highlight />
+                                    <InfoItem icon={<User size={14} />} label="Người bán" value={product.sellerName || "—"} />
+                                    <InfoItem label="Danh mục" value={product.categoryName || "—"} />
+                                    <InfoItem label="Thương hiệu" value={product.brandName || "—"} />
+                                </div>
+
+                                {/* Specs */}
+                                <h4 className="text-sm font-semibold text-gray-700 flex items-center gap-1.5">
+                                    <Settings size={14} /> Thông số kỹ thuật
+                                </h4>
+                                <div className="grid grid-cols-2 gap-3 bg-gray-50 rounded-xl p-4 text-sm">
+                                    <InfoItem label="Tình trạng" value={CONDITION_MAP[product.condition] || "—"} />
+                                    <InfoItem label="Khung" value={`${FRAME_MATERIAL_MAP[product.frameMaterial] || "—"} • Size ${product.frameSize || "—"}`} />
+                                    <InfoItem label="Bánh xe" value={product.wheelSize || "—"} />
+                                    <InfoItem label="Phanh" value={product.brakeType || "—"} />
+                                    <InfoItem label="Hệ thống số" value={product.gearSystem || "—"} />
+                                    <InfoItem label="Trọng lượng" value={product.weight ? `${product.weight} kg` : "—"} />
+                                    <InfoItem icon={<Palette size={14} />} label="Màu sắc" value={product.color || "—"} />
+                                    <InfoItem label="Năm SX" value={product.yearOfManufacture || "—"} />
+                                </div>
+
+                                {/* Additional */}
+                                <div className="grid grid-cols-2 gap-3 bg-gray-50 rounded-xl p-4 text-sm">
+                                    <InfoItem icon={<MapPin size={14} />} label="Khu vực" value={product.locationCity || "—"} />
+                                    <InfoItem label="Lịch sử sử dụng" value={product.usageHistory ? `${product.usageHistory} km` : "—"} />
+                                    <InfoItem label="Tồn kho" value={product.stockQuantity ?? "—"} />
+                                    <InfoItem icon={<Gauge size={14} />} label="Lượt xem" value={product.viewCount ?? 0} />
+                                    <InfoItem label="Trạng thái SP"
+                                        value={
+                                            <Badge variant={PRODUCT_STATUS_MAP[product.status]?.variant || "secondary"}>
+                                                {PRODUCT_STATUS_MAP[product.status]?.label || "—"}
+                                            </Badge>
+                                        }
+                                    />
+                                    <InfoItem icon={<Shield size={14} />} label="Kiểm định"
+                                        value={
+                                            <Badge variant={product.inspectionStatus === 2 ? "success" : "warning"}>
+                                                {INSPECTION_MAP[product.inspectionStatus] || "—"}
+                                            </Badge>
+                                        }
+                                    />
+                                </div>
+                            </>
+                        )}
+
+                        {/* Listing dates (fallback if no product) */}
+                        {!product && (
+                            <div className="grid grid-cols-2 gap-4 bg-gray-50 rounded-xl p-4">
+                                <InfoItem icon={<Tag size={14} />} label="Giá" value={formatMoney(listing.price)} />
+                                <InfoItem icon={<User size={14} />} label="Người bán" value={listing.sellerName || "—"} />
+                            </div>
+                        )}
+
+                        {/* Dates */}
+                        <div className="flex gap-6 text-xs text-gray-400 pt-1">
+                            <span>Ngày đăng: {formatDate(listing.createdAt)}</span>
+                            <span>Cập nhật: {formatDate(listing.updatedAt)}</span>
+                        </div>
+                    </div>
+                ) : null}
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+function InfoItem({ icon, label, value, highlight }) {
+    return (
+        <div className="space-y-0.5">
+            <p className="text-xs text-gray-400 flex items-center gap-1">
+                {icon} {label}
+            </p>
+            <div className={`text-sm ${highlight ? "font-semibold text-blue-600" : "font-medium"}`}>
+                {value}
+            </div>
+        </div>
+    )
+}
