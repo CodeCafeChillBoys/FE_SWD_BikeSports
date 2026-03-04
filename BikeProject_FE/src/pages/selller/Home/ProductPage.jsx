@@ -10,10 +10,11 @@ export default function ProductPage() {
     const [editingProduct, setEditingProduct] = useState(null)
     const [selectedProduct, setSelectedProduct] = useState(null)
     const [error, setError] = useState("")
+    const [success, setSuccess] = useState("")
 
     // Lấy sellerId từ localStorage
     const sellerId = localStorage.getItem("userId")
-    
+
     console.log("🔑 All localStorage keys:")
     console.log("  - userId:", localStorage.getItem("userId"))
     console.log("  - accessToken:", localStorage.getItem("accessToken"))
@@ -33,13 +34,13 @@ export default function ProductPage() {
         try {
             setLoading(true)
             setError("")
-            
+
             console.log("🔍 Fetching products for sellerId:", sellerId)
             const response = await productApi.getProductBySeller(sellerId)
             console.log("📦 API Response:", response)
             console.log("📦 Response type:", typeof response)
             console.log("📦 Is Array?", Array.isArray(response))
-            
+
             // Handle different response structures
             let productsList = []
             if (Array.isArray(response)) {
@@ -50,9 +51,46 @@ export default function ProductPage() {
                 // If single object returned, wrap in array
                 productsList = [response]
             }
-            
-            console.log("✅ Products list:", productsList)
-            setProducts(productsList)
+
+            // Merge any locally stored pending products (created but not yet returned by backend)
+            try {
+                const pendingAll = JSON.parse(localStorage.getItem('pendingProducts') || '[]')
+                const sellerPending = pendingAll.filter(p => String(p.sellerId) === String(sellerId))
+
+                // Remove pending items that already exist in the server list.
+                // Only remove when a pending item has a real `productId` that appears in server results.
+                // Avoid removing pending items based on `productName` to prevent collapsing multiple
+                // created entries that share the same name.
+                const remainingPending = pendingAll.filter(p => {
+                    if (p.productId) {
+                        return !productsList.some(prod => String(prod.productId) === String(p.productId))
+                    }
+                    // keep pending items without a productId
+                    return true
+                })
+
+                // Persist remaining pending (remove those already present)
+                localStorage.setItem('pendingProducts', JSON.stringify(remainingPending))
+
+                // Prepend seller pending items. Keep pending items without productId so multiple
+                // newly-created entries are shown. If a pending item has productId, avoid
+                // duplicating the server entry.
+                const merged = [
+                    ...sellerPending.filter(p => {
+                        if (p.productId) return !productsList.some(prod => String(prod.productId) === String(p.productId))
+                        return true
+                    }),
+                    ...productsList
+                ]
+
+                console.log("🔁 Merged products with pending local items:", merged)
+                setProducts(merged)
+            } catch (localErr) {
+                console.warn('Could not merge pending products from localStorage', localErr)
+                setProducts(productsList)
+            }
+
+            console.log("✅ Products list (from server):", productsList)
         } catch (err) {
             console.error("❌ Lỗi khi tải sản phẩm:", err)
             console.error("❌ Error response:", err.response)
@@ -80,7 +118,7 @@ export default function ProductPage() {
         try {
             setLoading(true)
             const response = await productApi.getProductDetail(productId)
-            
+
             // Handle different response structures
             const productDetail = response?.data || response
             setSelectedProduct(productDetail)
@@ -93,11 +131,45 @@ export default function ProductPage() {
     }
 
     // Đóng modal và refresh danh sách
-    const handleModalClose = (shouldRefresh) => {
+    const handleModalClose = (shouldRefresh, successMessage, newProductData) => {
         setShowModal(false)
         setEditingProduct(null)
+
         if (shouldRefresh) {
-            fetchProducts()
+            if (successMessage) {
+                setSuccess(successMessage)
+                setTimeout(() => setSuccess(""), 5000)
+            }
+
+            // Nếu có dữ liệu sản phẩm mới, thêm ngay vào list
+            if (newProductData) {
+                console.log("🔄 Adding new product to list:", newProductData)
+                // Save to localStorage pending list so it survives reloads until backend returns it
+                try {
+                    const pendingAll = JSON.parse(localStorage.getItem('pendingProducts') || '[]')
+                    // Avoid duplicates: if server provided productId, compare by that;
+                    // otherwise compare by client _localId (unique per creation)
+                    const exists = pendingAll.some(p => {
+                        if (newProductData.productId) {
+                            return String(p.productId) === String(newProductData.productId) && String(p.sellerId) === String(newProductData.sellerId)
+                        }
+                        // fallback to local id (should exist for local-only entries)
+                        return p._localId && newProductData._localId && p._localId === newProductData._localId && String(p.sellerId) === String(newProductData.sellerId)
+                    })
+                    if (!exists) {
+                        pendingAll.unshift(newProductData)
+                        localStorage.setItem('pendingProducts', JSON.stringify(pendingAll))
+                    }
+                } catch (localErr) {
+                    console.warn('Could not save pending product to localStorage', localErr)
+                }
+
+                setProducts(prev => [newProductData, ...prev]) // Thêm lên đầu list
+                setLoading(false) // Stop loading ngay
+            } else {
+                // Nếu không có data, fetch lại từ server
+                fetchProducts()
+            }
         }
     }
 
@@ -120,10 +192,19 @@ export default function ProductPage() {
                 </button>
             </div>
 
+            {/* Success Message */}
+            {success && (
+                <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-600 flex justify-between items-center">
+                    <span>{success}</span>
+                    <button onClick={() => setSuccess("")} className="text-green-800 hover:text-green-900">×</button>
+                </div>
+            )}
+
             {/* Error Message */}
             {error && (
-                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600">
-                    {error}
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-600 flex justify-between items-center">
+                    <span>{error}</span>
+                    <button onClick={() => setError("")} className="text-red-800 hover:text-red-900">×</button>
                 </div>
             )}
 

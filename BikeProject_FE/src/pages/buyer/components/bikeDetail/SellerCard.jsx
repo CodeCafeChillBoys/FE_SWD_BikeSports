@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Phone, Mail, Eye, Calendar } from "lucide-react"
 import orderAPI from "../../../../services/orderAPI"
+import { toast } from "react-toastify"
 
 function SellerCard({ bike }) {
 
@@ -41,12 +42,12 @@ function SellerCard({ bike }) {
 
             await orderAPI.createOrder(orderData)
 
-            alert("Đặt mua thành công!")
+            toast.success("Đặt mua thành công!")
             setShowForm(false)
 
         } catch (error) {
             console.error(error)
-            alert("Đặt mua thất bại!")
+            toast.error("Đặt mua thất bại!")
         }
     }
 
