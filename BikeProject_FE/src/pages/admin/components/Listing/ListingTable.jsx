@@ -14,12 +14,12 @@ import ListingDetailDialog from "./ListingDetailDialog"
 
 const STATUS_MAP = {
     1: { label: "Đang hiển thị", variant: "success" },
-    2: { label: "Hết hạn", variant: "secondary" },
+    2: { label: "Chờ duyệt", variant: "warning" },
     3: { label: "Từ chối", variant: "destructive" },
     4: { label: "Đã xóa", variant: "secondary" },
     // Fallback string keys
+    pending: { label: "Chờ duyệt", variant: "warning" },
     active: { label: "Đang hiển thị", variant: "success" },
-    expired: { label: "Hết hạn", variant: "secondary" },
     rejected: { label: "Từ chối", variant: "destructive" },
     deleted: { label: "Đã xóa", variant: "secondary" },
 }

@@ -1,6 +1,5 @@
 import './App.css'
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
-
 import AdminRoutes from './pages/admin/routes/adminRoutes'
 import BuyerRoutes from './pages/buyer/routes/BuyerRoutes'
 import InspectorRoutes from './pages/inspector/routes/inspectorRoutes'
@@ -10,10 +9,24 @@ import UnauthorizedPage from './pages/unauthorized/UnauthorizedPage'
 import ProtectedRoute from './routes/ProtectedRoute'
 import HomePage from './pages/home/HomePage'
 import VnPayReturn from './pages/buyer/Home/VnPayReturn'
+import { ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 function App() {
   return (
     <BrowserRouter>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
       <Routes>
 
         {/* PUBLIC */}

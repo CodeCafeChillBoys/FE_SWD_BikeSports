@@ -10,15 +10,18 @@ import {
 import { Badge } from "../../../../components/ui/badge"
 import listingApi from "../../../../services/listingAPI"
 import productApi from "../../../../services/productApi"
+import { getToken } from "../../../../utils/auth"
 
 // ===== STATUS MAPS =====
+// Normalized to buyer mapping: 1=Đang hiển thị, 2=Chờ duyệt, 3=Từ chối, 4=Đã xóa
 const LISTING_STATUS = {
     1: { label: "Đang hiển thị", variant: "success" },
-    2: { label: "Hết hạn", variant: "secondary" },
+    2: { label: "Chờ duyệt", variant: "warning" },
     3: { label: "Từ chối", variant: "destructive" },
     4: { label: "Đã xóa", variant: "secondary" },
+    // Fallback string keys
+    pending: { label: "Chờ duyệt", variant: "warning" },
     active: { label: "Đang hiển thị", variant: "success" },
-    expired: { label: "Hết hạn", variant: "secondary" },
     rejected: { label: "Từ chối", variant: "destructive" },
     deleted: { label: "Đã xóa", variant: "secondary" },
 }
@@ -33,49 +36,72 @@ const PRODUCT_STATUS_MAP = {
     5: { label: "Chờ duyệt", variant: "warning" },
     6: { label: "Từ chối", variant: "destructive" },
 }
-const INSPECTION_MAP = { 1: "Chưa kiểm định", 2: "Đã kiểm định" }
+
 
 export default function ListingDetailDialog({ listingId, open, onOpenChange }) {
     const [listing, setListing] = useState(null)
     const [product, setProduct] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    const [selectedStatus, setSelectedStatus] = useState(null)
+    const [approving, setApproving] = useState(false)
+    const decodeUserNameFromToken = () => {
+        const raw = getToken() || localStorage.getItem('access_token') || localStorage.getItem('accessToken')
+        if (!raw) return ""
+        const token = raw.split(' ')[1] ?? raw
+        try {
+            const payload = JSON.parse(window.atob(token.split('.')[1] || ''))
+            return payload.userName || payload.fullName || payload.name || payload.sub || ""
+        } catch {
+            return ""
+        }
+    }
+
+    const [approvedBy, setApprovedBy] = useState(decodeUserNameFromToken())
 
     const API_BASE_URL =
         import.meta.env.VITE_API_BASE_URL || 'https://localhost:7247'
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(() => {
         if (!open || !listingId) return
 
+        let mounted = true
+
         const fetchDetail = async () => {
             try {
+                if (!mounted) return
                 setLoading(true)
                 setError(null)
 
                 // 1. Fetch listing
                 const listingRes = await listingApi.getListingById(listingId)
                 console.log("📦 Listing Detail:", listingRes)
+                if (!mounted) return
                 setListing(listingRes)
+                setSelectedStatus(listingRes?.status ?? null)
 
                 // 2. Fetch product detail using productId from listing
                 if (listingRes?.productId) {
                     try {
                         const productRes = await productApi.getProductDetail(listingRes.productId)
                         console.log("� Product Detail:", productRes)
-                        setProduct(productRes)
+                        if (mounted) setProduct(productRes)
                     } catch (e) {
                         console.warn("Could not fetch product detail", e)
                     }
                 }
             } catch (err) {
                 console.error("❌ Fetch listing detail error:", err)
-                setError("Không thể tải thông tin tin đăng.")
+                if (mounted) setError("Không thể tải thông tin tin đăng.")
             } finally {
-                setLoading(false)
+                if (mounted) setLoading(false)
             }
         }
 
         fetchDetail()
+
+        return () => { mounted = false }
     }, [open, listingId])
 
     const formatDate = (value) => {
@@ -88,7 +114,27 @@ export default function ListingDetailDialog({ listingId, open, onOpenChange }) {
         return Number(value).toLocaleString("vi-VN") + " đ"
     }
 
-    const listingStatus = LISTING_STATUS[listing?.status] || LISTING_STATUS[String(listing?.status).toLowerCase()] || { label: String(listing?.status), variant: "secondary" }
+    const listingStatus = LISTING_STATUS[Number(listing?.status)] || LISTING_STATUS[String(listing?.status).toLowerCase()] || { label: String(listing?.status), variant: "secondary" }
+
+    const handleApprove = async () => {
+        if (!listingId) return
+        try {
+            setApproving(true)
+            setError(null)
+            const payload = {
+                approvedBy: approvedBy || "",
+                status: Number(selectedStatus) || 1,
+            }
+            await listingApi.approveListing(listingId, payload)
+            // update local state
+            setListing(prev => ({ ...(prev || {}), status: Number(payload.status) }))
+        } catch (err) {
+            console.error("Approve listing error:", err)
+            setError("Không thể cập nhật trạng thái.")
+        } finally {
+            setApproving(false)
+        }
+    }
     const image = product?.featuredImage || listing?.featuredImage
 
     return (
@@ -126,7 +172,36 @@ export default function ListingDetailDialog({ listingId, open, onOpenChange }) {
                         {/* Title + Listing Status */}
                         <div className="flex items-start justify-between gap-3">
                             <h3 className="text-lg font-semibold">{listing.title || product?.productName || "Không có tiêu đề"}</h3>
-                            <Badge variant={listingStatus.variant}>{listingStatus.label}</Badge>
+                            <div className="flex items-center gap-3">
+                                <Badge variant={listingStatus.variant}>{listingStatus.label}</Badge>
+                                {/* Admin controls: status select + approve button */}
+                                <div className="flex items-center gap-2">
+                                    <select
+                                        value={selectedStatus ?? ""}
+                                        onChange={(e) => setSelectedStatus(Number(e.target.value))}
+                                        className="text-sm border rounded px-2 py-1"
+                                    >
+                                        <option value="">-- Chọn trạng thái --</option>
+                                        <option value={1}>Đang hiển thị</option>
+                                        <option value={2}>Chờ duyệt</option>
+                                        <option value={3}>Từ chối</option>
+                                        <option value={4}>Đã xóa</option>
+                                    </select>
+                                    <input
+                                        placeholder="Người duyệt"
+                                        value={approvedBy}
+                                        onChange={(e) => setApprovedBy(e.target.value)}
+                                        className="text-sm border rounded px-2 py-1"
+                                    />
+                                    <button
+                                        onClick={handleApprove}
+                                        disabled={approving || selectedStatus == null}
+                                        className="px-3 py-1 bg-blue-600 text-white rounded text-sm disabled:opacity-50"
+                                    >
+                                        {approving ? "Đang cập nhật..." : "Cập nhật"}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Description */}
@@ -175,13 +250,7 @@ export default function ListingDetailDialog({ listingId, open, onOpenChange }) {
                                             </Badge>
                                         }
                                     />
-                                    <InfoItem icon={<Shield size={14} />} label="Kiểm định"
-                                        value={
-                                            <Badge variant={product.inspectionStatus === 2 ? "success" : "warning"}>
-                                                {INSPECTION_MAP[product.inspectionStatus] || "—"}
-                                            </Badge>
-                                        }
-                                    />
+                                    {/* Kiểm định: removed per request */}
                                 </div>
                             </>
                         )}

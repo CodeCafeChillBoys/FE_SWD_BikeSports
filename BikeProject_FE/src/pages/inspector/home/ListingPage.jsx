@@ -65,10 +65,18 @@ export default function ListingPage() {
             setListings(prev =>
                 prev.map(p =>
                     p.productId === productId
-                        ? { ...p, hasReport: true }
+                        ? { ...p, hasReport: true, inspectionStatus: 2 }
                         : p
                 )
             )
+
+            // Try to update product inspectionStatus on backend as well so other roles see the change
+            try {
+                await productApi.updateProduct(productId, { inspectionStatus: 2 })
+            } catch (updateErr) {
+                // Not fatal: backend may not support this or require different endpoint/permissions
+                console.warn('Could not update product inspectionStatus on backend', updateErr)
+            }
 
         } catch (error) {
             console.error("Create inspection report error", error)

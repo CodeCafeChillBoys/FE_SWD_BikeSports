@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, useLocation } from "react-router-dom"
 import productApi from "../../../services/productApi"
 import listingApi from "../../../services/listingAPI"
 
 export default function CreateListingPage() {
     const navigate = useNavigate()
+    const location = useLocation()
     const sellerId = localStorage.getItem("userId")
 
     const [products, setProducts] = useState([])
@@ -20,12 +21,14 @@ export default function CreateListingPage() {
     })
 
     // Lấy danh sách sản phẩm của seller
-    useEffect(() => {
+    const fetchProducts = () => {
         if (!sellerId) {
             setError("Không tìm thấy thông tin người bán. Vui lòng đăng nhập lại.")
             return
         }
         setLoadingProducts(true)
+        setError("")
+
         productApi.getProductBySeller(sellerId)
             .then((res) => {
                 // api.js response interceptor trả về response.data trực tiếp
@@ -37,9 +40,59 @@ export default function CreateListingPage() {
                 } else if (res && typeof res === "object") {
                     list = [res]
                 }
+
+                console.log("📦 Loaded products for listing:", list)
                 setProducts(list)
-                if (list.length > 0) {
-                    setForm(prev => ({ ...prev, productId: list[0].productId ?? list[0].id ?? "" }))
+
+                // If user just created a product (or navigated from a product card), prefer selecting that product by id.
+                try {
+                    const navProductId = location?.state?.productId
+                    const navProductName = location?.state?.productName
+                    const lastId = localStorage.getItem('lastCreatedProductId')
+                    const lastObj = JSON.parse(localStorage.getItem('lastCreatedProduct') || 'null')
+
+                    // Prefer navigation state productId (from ProductCard 'Đăng tin' button)
+                    if (navProductId) {
+                        const found = list.find(p => String(p.productId ?? p.id) === String(navProductId))
+                        if (found) {
+                            setForm(prev => ({ ...prev, productId: found.productId ?? found.id ?? String(navProductId) }))
+                        } else {
+                            // server hasn't returned it (maybe client-only or synthetic) -> add synthetic option
+                            const synthetic = { productId: String(navProductId), productName: navProductName ?? String(navProductId), sellerId }
+                            setProducts(prev => [synthetic, ...prev])
+                            setForm(prev => ({ ...prev, productId: String(navProductId) }))
+                        }
+                        // clear navigation state so copy/paste doesn't reapply
+                        window.history.replaceState({}, '')
+                        return
+                    }
+
+                    if (lastId) {
+                        const found = list.find(p => String(p.productId ?? p.id) === String(lastId))
+                        if (found) {
+                            setForm(prev => ({ ...prev, productId: found.productId ?? found.id ?? String(lastId) }))
+                            localStorage.removeItem('lastCreatedProductId')
+                            localStorage.removeItem('lastCreatedProduct')
+                            return
+                        }
+                    }
+
+                    if (!lastId && lastObj && lastObj.sellerId && String(lastObj.sellerId) === String(sellerId)) {
+                        const syntheticId = lastObj.productId ?? lastObj._localId ?? `local-sel-${Date.now()}`
+                        const toAdd = { ...(lastObj), productId: syntheticId }
+                        setProducts(prev => [toAdd, ...prev])
+                        setForm(prev => ({ ...prev, productId: syntheticId }))
+                        return
+                    }
+
+                    if (list.length > 0 && !form.productId) {
+                        setForm(prev => ({ ...prev, productId: list[0].productId ?? list[0].id ?? "" }))
+                    }
+                } catch (e) {
+                    console.warn('Could not auto-select last created product', e)
+                    if (list.length > 0 && !form.productId) {
+                        setForm(prev => ({ ...prev, productId: list[0].productId ?? list[0].id ?? "" }))
+                    }
                 }
             })
             .catch((err) => {
@@ -47,7 +100,26 @@ export default function CreateListingPage() {
                 setError("Không thể tải danh sách sản phẩm.")
             })
             .finally(() => setLoadingProducts(false))
-    }, [sellerId])
+    }
+
+    useEffect(() => {
+        fetchProducts()
+    }, [sellerId, location.key]) // Re-fetch khi navigate vào trang
+
+    // If navigate here with a productId in state (from ProductCard), auto-select it
+    useEffect(() => {
+        try {
+            const navProductId = location?.state?.productId
+            const navProductName = location?.state?.productName
+            if (navProductId) {
+                setForm(prev => ({ ...prev, productId: String(navProductId) }))
+            } else if (navProductName && products.length === 0) {
+                // nothing to select yet; saved by fetchProducts logic which will handle lastCreatedProduct
+            }
+        } catch (e) {
+            console.warn('Could not read navigation state for product selection', e)
+        }
+    }, [location, products])
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -90,13 +162,22 @@ export default function CreateListingPage() {
         <div className="p-6 max-w-2xl mx-auto">
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold">Đăng tin bán xe</h1>
-                <button
-                    type="button"
-                    onClick={() => navigate("/seller/listings")}
-                    className="text-sm text-gray-500 hover:text-gray-700"
-                >
-                    ← Quay lại
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        type="button"
+                        onClick={() => navigate("/seller/products")}
+                        className="text-sm px-4 py-2 border rounded-lg hover:bg-gray-50"
+                    >
+                        📦 Quản lý sản phẩm
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => navigate("/seller/listings")}
+                        className="text-sm text-gray-500 hover:text-gray-700"
+                    >
+                        ← Quay lại
+                    </button>
+                </div>
             </div>
 
             {error && (
@@ -114,18 +195,34 @@ export default function CreateListingPage() {
 
                 {/* Chọn sản phẩm */}
                 <div>
-                    <label className="block text-sm font-medium mb-1">
-                        Sản phẩm <span className="text-red-500">*</span>
-                    </label>
+                    <div className="flex justify-between items-center mb-1">
+                        <label className="block text-sm font-medium">
+                            Sản phẩm <span className="text-red-500">*</span>
+                        </label>
+                        <button
+                            type="button"
+                            onClick={fetchProducts}
+                            disabled={loadingProducts}
+                            className="text-xs text-blue-600 hover:text-blue-800 disabled:text-gray-400"
+                        >
+                            {loadingProducts ? "🔄 Đang tải..." : "🔄 Làm mới"}
+                        </button>
+                    </div>
                     {loadingProducts ? (
                         <p className="text-sm text-gray-400">Đang tải sản phẩm...</p>
                     ) : products.length === 0 ? (
-                        <p className="text-sm text-orange-500">
-                            Bạn chưa có sản phẩm nào.{" "}
-                            <a href="/seller/products" className="underline text-blue-600">
-                                Tạo sản phẩm trước
-                            </a>
-                        </p>
+                        <div className="text-sm p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                            <p className="text-orange-700 mb-2">
+                                Bạn chưa có sản phẩm nào để đăng tin.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={() => navigate("/seller/products")}
+                                className="text-blue-600 hover:text-blue-800 underline font-medium"
+                            >
+                                → Tạo sản phẩm mới ngay
+                            </button>
+                        </div>
                     ) : (
                         <select
                             name="productId"

@@ -1,9 +1,10 @@
 function StatusTabs({ current, onChange, counts }) {
     const tabs = [
-        { key: "all",      label: `Tất cả (${counts.all ?? 0})` },
-        { key: "active",   label: `Đang hiển thị (${counts.active ?? 0})` },
-        { key: "pending",  label: `Chờ duyệt (${counts.pending ?? 0})` },
-        { key: "rejected", label: `Từ chối (${counts.rejected ?? 0})` },
+        { key: "all", label: `Tất cả (${counts.all ?? 0})` },
+        { key: 1, label: `Đang hiển thị (${counts[1] ?? 0})` },
+        { key: 2, label: `Chờ duyệt (${counts[2] ?? 0})` },
+        { key: 3, label: `Từ chối (${counts[3] ?? 0})` },
+        { key: 4, label: `Đã xóa (${counts[4] ?? 0})` },
     ]
 
     return (
