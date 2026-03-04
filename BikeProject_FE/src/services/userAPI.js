@@ -10,3 +10,5 @@ export const userAPI = {
     updateStatus: (userId, data) =>
         apiClient.patch(`/User/${userId}/UpdateStatus`, data),
 };
+
+

@@ -1,6 +1,5 @@
 import './App.css'
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
-
 import AdminRoutes from './pages/admin/routes/adminRoutes'
 import BuyerRoutes from './pages/buyer/routes/BuyerRoutes'
 import InspectorRoutes from './pages/inspector/routes/inspectorRoutes'
