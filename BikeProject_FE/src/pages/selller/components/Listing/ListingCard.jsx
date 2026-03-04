@@ -1,16 +1,16 @@
 import { MoreVertical, Clock, CheckCircle, XCircle, Loader } from "lucide-react"
 
 const STATUS_MAP = {
-    active:   { label: "Đang hiển thị", color: "bg-green-100 text-green-600",  icon: <CheckCircle size={13} /> },
-    pending:  { label: "Chờ duyệt",     color: "bg-yellow-100 text-yellow-600", icon: <Loader size={13} /> },
-    rejected: { label: "Từ chối",        color: "bg-red-100 text-red-500",      icon: <XCircle size={13} /> },
-    hidden:   { label: "Đã ẩn",          color: "bg-gray-100 text-gray-500",    icon: <Clock size={13} /> },
+    1: { label: "Đang hiển thị", color: "bg-green-100 text-green-600", icon: <CheckCircle size={13} /> },
+    2: { label: "Chờ duyệt", color: "bg-yellow-100 text-yellow-600", icon: <Loader size={13} /> },
+    3: { label: "Từ chối", color: "bg-red-100 text-red-500", icon: <XCircle size={13} /> },
+    4: { label: "Đã xóa", color: "bg-gray-100 text-gray-500", icon: <Clock size={13} /> },
 }
 
 export default function ListingCard({ item }) {
     const image = item.featuredImage ?? item.images?.[0]
-    const status = String(item.status ?? "pending").toLowerCase()
-    const statusInfo = STATUS_MAP[status] ?? STATUS_MAP.pending
+    const status = Number(item.status ?? 1)
+    const statusInfo = STATUS_MAP[status] ?? STATUS_MAP[1]
 
     const formatDate = (dateStr) => {
         if (!dateStr) return "—"

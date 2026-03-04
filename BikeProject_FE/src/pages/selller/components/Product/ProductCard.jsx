@@ -1,4 +1,7 @@
+import { useNavigate } from "react-router-dom"
+
 export default function ProductCard({ product, onEdit, onViewDetail }) {
+    const navigate = useNavigate()
     const getConditionText = (condition) => {
         const map = {
             0: "Mới 100%",
@@ -10,11 +13,15 @@ export default function ProductCard({ product, onEdit, onViewDetail }) {
     }
 
     const getStatusBadge = (status) => {
+        // New mapping:
+        // 1 = available | 2 = sold | 3 = reserved | 4 = hidden | 5 = pending_approval | 6 = rejected
         const statusMap = {
-            0: { text: "Đang chờ", color: "bg-yellow-100 text-yellow-800" },
-            1: { text: "Hoạt động", color: "bg-green-100 text-green-800" },
-            2: { text: "Ẩn", color: "bg-gray-100 text-gray-800" },
-            3: { text: "Đã bán", color: "bg-blue-100 text-blue-800" },
+            1: { text: "Có sẵn", color: "bg-green-100 text-green-800" },
+            2: { text: "Đã bán", color: "bg-blue-100 text-blue-800" },
+            3: { text: "Đã đặt", color: "bg-yellow-100 text-yellow-800" },
+            4: { text: "Đã ẩn", color: "bg-gray-100 text-gray-800" },
+            5: { text: "Chờ duyệt", color: "bg-orange-100 text-orange-800" },
+            6: { text: "Từ chối", color: "bg-red-100 text-red-800" },
         }
         const badge = statusMap[status] || statusMap[0]
         return (
@@ -25,13 +32,12 @@ export default function ProductCard({ product, onEdit, onViewDetail }) {
     }
 
     const getInspectionBadge = (inspectionStatus) => {
+        // New mapping: 1 = Not Inspected | 2 = Inspected
         const map = {
-            0: { text: "Chưa kiểm tra", color: "bg-gray-100 text-gray-800" },
-            1: { text: "Đang kiểm tra", color: "bg-blue-100 text-blue-800" },
-            2: { text: "Đã duyệt", color: "bg-green-100 text-green-800" },
-            3: { text: "Từ chối", color: "bg-red-100 text-red-800" },
+            1: { text: "Chưa kiểm định", color: "bg-gray-100 text-gray-800" },
+            2: { text: "Đã kiểm định", color: "bg-green-100 text-green-800" },
         }
-        const badge = map[inspectionStatus] || map[0]
+        const badge = map[inspectionStatus] || { text: "Chưa kiểm định", color: "bg-gray-100 text-gray-800" }
         return (
             <span className={`px-2 py-1 rounded text-xs font-medium ${badge.color}`}>
                 {badge.text}
@@ -104,12 +110,24 @@ export default function ProductCard({ product, onEdit, onViewDetail }) {
             )}
 
             {/* Action Button */}
-            <button
-                onClick={() => onViewDetail(product.productId)}
-                className="w-full py-2 border rounded-lg hover:bg-gray-50 transition text-sm font-medium"
-            >
-                Xem chi tiết
-            </button>
+            <div className="flex gap-2">
+                <button
+                    onClick={() => onViewDetail(product.productId)}
+                    className="flex-1 py-2 border rounded-lg hover:bg-gray-50 transition text-sm font-medium"
+                >
+                    Xem chi tiết
+                </button>
+
+                <button
+                    onClick={() => {
+                        const id = product.productId ?? product.id
+                        navigate('/seller/listings/new', { state: { productId: id, productName: product.productName ?? product.name } })
+                    }}
+                    className="py-2 px-3 rounded-lg bg-black text-white text-sm hover:bg-gray-800"
+                >
+                    Đăng tin
+                </button>
+            </div>
         </div>
     )
 }

@@ -4,8 +4,6 @@ import CreateListingPage from "../Home/CreateListingPage"
 import SellerListingsPage from "../Home/SellerListingPage"
 import SellerLayout from "../layouts/sellerLayout"
 import OrderPage from "../Home/OrderPage"
-import ChatPage from "../Home/ChatPage"
-import SellerDetailPage from "../Home/SellerDetailPage"
 import ProductPage from "../Home/ProductPage"
 
 function SellerRoutes() {
@@ -17,8 +15,6 @@ function SellerRoutes() {
                 <Route path="listings" element={<SellerListingsPage />} />
                 <Route path="products" element={<ProductPage />} />
                 <Route path="orders" element={<OrderPage />} />
-                <Route path="messages" element={<ChatPage />} />
-                <Route path="reviews" element={<SellerDetailPage />} />
             </Route>
         </Routes>
     )

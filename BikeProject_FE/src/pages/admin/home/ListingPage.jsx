@@ -9,8 +9,9 @@ import { Search } from "lucide-react"
 const STATUS_TABS = [
     { key: "all", label: "Tất cả" },
     { key: 1, label: "Đang hiển thị" },
-    { key: 2, label: "Hết hạn" },
+    { key: 2, label: "Chờ duyệt" },
     { key: 3, label: "Từ chối" },
+    { key: 4, label: "Đã xóa" },
 ]
 
 function ListingPage() {
@@ -90,6 +91,7 @@ function ListingPage() {
         1: listings.filter(l => Number(l.status) === 1).length,
         2: listings.filter(l => Number(l.status) === 2).length,
         3: listings.filter(l => Number(l.status) === 3).length,
+        4: listings.filter(l => Number(l.status) === 4).length,
     }), [listings])
 
     // Filter by tab + search keyword
