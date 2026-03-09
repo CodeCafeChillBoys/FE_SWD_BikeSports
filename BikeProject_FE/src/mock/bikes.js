@@ -11,8 +11,8 @@ const bikes = [
         negotiable: true,
         verified: true,
         images: [
-            'https://images.unsplash.com/photo-1604677657548-4ced0c4f40c6',
-            'https://images.unsplash.com/photo-1595433707802-1f0a1b5b0d5f',
+            'https://images.unsplash.com/photo-1571333250630-f0230c320b6d?q=80&w=800&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?q=80&w=800&auto=format&fit=crop',
         ],
         description:
             'Xe đạp Giant Talon 29er, phuộc trước 100mm, bộ truyền động Shimano Deore 1x12.',
@@ -53,8 +53,8 @@ const bikes = [
         negotiable: false,
         verified: false,
         images: [
-            'https://images.unsplash.com/photo-1684248079343-1e6af2a3d1bf',
-            'https://images.unsplash.com/photo-1529429617124-a2e0b7e0e3b6',
+            'https://images.unsplash.com/photo-1532298229144-0ec0c57515c7?q=80&w=800&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1505705694340-019e1e335916?q=80&w=800&auto=format&fit=crop',
         ],
         description:
             'Trek Domane AL 2 mới 100%, phù hợp đi đường trường và tập luyện.',
@@ -89,8 +89,8 @@ const bikes = [
         negotiable: true,
         verified: true,
         images: [
-            'https://images.unsplash.com/photo-1692668696811-90976b749459',
-            'https://images.unsplash.com/photo-1603380353725-f8a4d39cc41e',
+            'https://images.unsplash.com/photo-1559348349-86f1f65817fe?q=80&w=800&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1571068316344-75bc76f77890?q=80&w=800&auto=format&fit=crop',
         ],
         description:
             'VanMoof S3 xe đạp điện cao cấp, thiết kế tối giản, pin bền.',
@@ -131,8 +131,8 @@ const bikes = [
         negotiable: false,
         verified: true,
         images: [
-            'https://images.unsplash.com/photo-1549298916-b41d501d3772',
-            'https://images.unsplash.com/photo-1518655048521-f130df041f66',
+            'https://images.unsplash.com/photo-1485965120184-e220f721d03e?q=80&w=800&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1511994714008-b6c0637c2025?q=80&w=800&auto=format&fit=crop',
         ],
         description:
             'Specialized Rockhopper mới, phù hợp người mới bắt đầu MTB.',
@@ -172,8 +172,8 @@ const bikes = [
         negotiable: true,
         verified: false,
         images: [
-            'https://images.unsplash.com/photo-1507035895480-2b3156c31fc8',
-            'https://images.unsplash.com/photo-1519125323398-675f0ddb6308',
+            'https://images.unsplash.com/photo-1576435728678-68d0fbf94e91?q=80&w=800&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=800&auto=format&fit=crop',
         ],
         description:
             'Cannondale Quick 4 phù hợp đi phố và tập luyện nhẹ.',
@@ -208,8 +208,8 @@ const bikes = [
         negotiable: false,
         verified: true,
         images: [
-            'https://images.unsplash.com/photo-1597262975002-c5c3b14bbd62',
-            'https://images.unsplash.com/photo-1520975922215-6c1fbc6c02b2',
+            'https://images.unsplash.com/photo-1507035895480-2b3156c31fc8?q=80&w=800&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1517649763962-0c623066013b?q=80&w=800&auto=format&fit=crop',
         ],
         description:
             'Merida Scultura 400 mới, khung nhẹ, phù hợp tập luyện chuyên sâu.',
@@ -249,8 +249,8 @@ const bikes = [
         negotiable: true,
         verified: false,
         images: [
-            'https://images.unsplash.com/photo-1622560480605-d83c853bc5c3',
-            'https://images.unsplash.com/photo-1612119961954-31cfe18a64c8',
+            'https://images.unsplash.com/photo-1559348349-86f1f65817fe?q=80&w=800&auto=format&fit=crop',
+            'https://images.unsplash.com/photo-1606916092565-1e54f0c9d039?q=80&w=800&auto=format&fit=crop',
         ],
         description:
             'Xiaomi Himo Z20 xe đạp điện gấp gọn, pin bền, phù hợp đi học và đi làm.',
