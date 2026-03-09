@@ -41,6 +41,13 @@ export default function CreateListingPage() {
                     list = [res]
                 }
 
+                // Sort theo thời gian mới nhất lên đầu
+                list.sort((a, b) => {
+                    const dateA = new Date(a.updatedAt || a.createdAt || 0)
+                    const dateB = new Date(b.updatedAt || b.createdAt || 0)
+                    return dateB - dateA
+                })
+
                 console.log("📦 Loaded products for listing:", list)
                 setProducts(list)
 
@@ -121,9 +128,61 @@ export default function CreateListingPage() {
         }
     }, [location, products])
 
-    const handleChange = (e) => {
+    // 🎯 Tự động load hình ảnh từ product được chọn
+    useEffect(() => {
+        const loadProductImage = async () => {
+            if (form.productId && !form.featuredImage) {
+                try {
+                    const productDetail = await productApi.getProductDetail(form.productId)
+                    const productData = productDetail?.data || productDetail
+
+                    if (productData?.featuredImage) {
+                        setForm(prev => ({
+                            ...prev,
+                            featuredImage: productData.featuredImage,
+                            title: prev.title || productData.productName || ""
+                        }))
+                    }
+                } catch (err) {
+                    console.warn("Không thể tự động load hình ảnh product:", err)
+                }
+            }
+        }
+
+        loadProductImage()
+    }, [form.productId])
+
+    const handleChange = async (e) => {
         const { name, value } = e.target
         setForm(prev => ({ ...prev, [name]: value }))
+
+        // 🎯 Khi chọn product, tự động lấy hình ảnh từ product
+        if (name === "productId" && value) {
+            try {
+                const productDetail = await productApi.getProductDetail(value)
+                const productData = productDetail?.data || productDetail
+
+                console.log("📸 Product detail fetched:", productData)
+                console.log("🖼️ Featured Image:", productData?.featuredImage)
+
+                // Tự động điền featuredImage từ product nếu có
+                if (productData?.featuredImage) {
+                    setForm(prev => ({
+                        ...prev,
+                        productId: value,
+                        featuredImage: productData.featuredImage,
+                        // Tự động điền title nếu chưa có
+                        title: prev.title || productData.productName || ""
+                    }))
+                } else {
+                    console.warn("⚠️ Product không có featuredImage")
+                }
+            } catch (err) {
+                console.warn("Không thể lấy chi tiết sản phẩm:", err)
+                // Vẫn set productId ngay cả khi fetch fail
+                setForm(prev => ({ ...prev, productId: value }))
+            }
+        }
     }
 
     const handleSubmit = async (e) => {
@@ -142,14 +201,19 @@ export default function CreateListingPage() {
 
         setSubmitting(true)
         try {
-            await listingApi.createListing({
+            const response = await listingApi.createListing({
                 productId: form.productId,
                 sellerId: sellerId,
                 title: form.title.trim(),
                 featuredImage: form.featuredImage.trim(),
             })
-            setSuccess("Đăng tin thành công!")
-            setTimeout(() => navigate("/seller/listings"), 1500)
+
+            console.log("✅ Listing created:", response)
+
+            // Navigate với success message
+            navigate("/seller/listings", {
+                state: { success: "Đăng tin thành công! Tin đăng mới đã được tạo." }
+            })
         } catch (err) {
             const msg = err?.response?.data?.message ?? err?.response?.data ?? "Đăng tin thất bại. Vui lòng thử lại."
             setError(typeof msg === "string" ? msg : JSON.stringify(msg))

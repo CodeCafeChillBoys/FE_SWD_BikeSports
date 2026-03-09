@@ -39,6 +39,7 @@ export default function ProductForm({ product, sellerId, onClose }) {
         price: 0,
         stockQuantity: 1,
         locationCity: "",
+        featuredImage: "",
         // Default to pending approval + not inspected according to new schema
         status: 5,
         inspectionStatus: 1
@@ -69,8 +70,8 @@ export default function ProductForm({ product, sellerId, onClose }) {
             usageHistory: parseNumber(formData.usageHistory, 0),
             price: parseNumber(formData.price, 0),
             stockQuantity: parseNumber(formData.stockQuantity, 1),
-            locationCity: formData.locationCity || ""
-            ,
+            locationCity: formData.locationCity || "",
+            featuredImage: formData.featuredImage || "",
             status: parseNumber(formData.status, 5),
             inspectionStatus: parseNumber(formData.inspectionStatus, 1)
         }
@@ -98,6 +99,7 @@ export default function ProductForm({ product, sellerId, onClose }) {
                 price: product.price || 0,
                 stockQuantity: product.stockQuantity || 1,
                 locationCity: product.locationCity || "",
+                featuredImage: product.featuredImage || "",
                 status: product.status ?? 0,
                 inspectionStatus: product.inspectionStatus ?? 0
             })
@@ -188,6 +190,7 @@ export default function ProductForm({ product, sellerId, onClose }) {
                     price: raw.price ?? formData.price,
                     stockQuantity: raw.stockQuantity ?? formData.stockQuantity,
                     locationCity: raw.locationCity ?? formData.locationCity,
+                    featuredImage: raw.featuredImage ?? formData.featuredImage,
                     status: raw.status ?? payload.status,
                     inspectionStatus: raw.inspectionStatus ?? payload.inspectionStatus
                 }
@@ -239,31 +242,31 @@ export default function ProductForm({ product, sellerId, onClose }) {
     }
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-            <div className="bg-white rounded-xl p-6 max-w-4xl w-full my-8">
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 overflow-y-auto">
+            <div className="bg-white rounded-xl p-3 max-w-2xl w-full my-4 max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-2 sticky top-0 bg-white z-10 pb-2 border-b">
+                    <h2 className="text-lg font-bold">
                         {isEditing ? "Chỉnh sửa sản phẩm" : "Tạo sản phẩm mới"}
                     </h2>
                     <button
                         onClick={() => onClose(false)}
-                        className="text-gray-500 hover:text-gray-700 text-3xl leading-none"
+                        className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
                     >
                         ×
                     </button>
                 </div>
 
                 {error && (
-                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm whitespace-pre-line">
+                    <div className="mb-2 p-2 bg-red-50 border border-red-200 rounded text-red-600 text-xs whitespace-pre-line">
                         {error}
                     </div>
                 )}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit} className="space-y-2">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                         {/* Tên sản phẩm */}
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Tên sản phẩm <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -271,7 +274,7 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 name="productName"
                                 value={formData.productName}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 placeholder="VD: Giant Talon 29er"
                                 required
                             />
@@ -279,7 +282,7 @@ export default function ProductForm({ product, sellerId, onClose }) {
 
                         {/* Category và Brand */}
                         <div>
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Danh mục <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -287,7 +290,7 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 name="categoryId"
                                 value={formData.categoryId}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 placeholder="ID Danh mục (VD: 1)"
                                 min="1"
                                 required
@@ -295,7 +298,7 @@ export default function ProductForm({ product, sellerId, onClose }) {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Thương hiệu <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -303,7 +306,7 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 name="brandId"
                                 value={formData.brandId}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 placeholder="ID Thương hiệu (VD: 1)"
                                 min="1"
                                 required
@@ -312,14 +315,14 @@ export default function ProductForm({ product, sellerId, onClose }) {
 
                         {/* Condition */}
                         <div>
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Tình trạng
                             </label>
                             <select
                                 name="condition"
                                 value={formData.condition}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                             >
                                 {CONDITION_OPTIONS.map(opt => (
                                     <option key={opt.value} value={opt.value}>
@@ -331,14 +334,14 @@ export default function ProductForm({ product, sellerId, onClose }) {
 
                         {/* Frame Material */}
                         <div>
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Chất liệu khung
                             </label>
                             <select
                                 name="frameMaterial"
                                 value={formData.frameMaterial}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                             >
                                 {FRAME_MATERIAL_OPTIONS.map(opt => (
                                     <option key={opt.value} value={opt.value}>
@@ -350,7 +353,7 @@ export default function ProductForm({ product, sellerId, onClose }) {
 
                         {/* Frame Size & Wheel Size */}
                         <div>
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Kích thước khung
                             </label>
                             <input
@@ -358,13 +361,13 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 name="frameSize"
                                 value={formData.frameSize}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 placeholder="VD: XL, L, M, S"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Kích thước bánh xe
                             </label>
                             <input
@@ -372,14 +375,14 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 name="wheelSize"
                                 value={formData.wheelSize}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 placeholder="VD: 29 inch"
                             />
                         </div>
 
                         {/* Brake & Gear */}
                         <div>
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Loại phanh
                             </label>
                             <input
@@ -387,13 +390,13 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 name="brakeType"
                                 value={formData.brakeType}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 placeholder="VD: Đĩa thủy lực"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Hệ thống số
                             </label>
                             <input
@@ -401,14 +404,14 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 name="gearSystem"
                                 value={formData.gearSystem}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 placeholder="VD: Shimano 21 số"
                             />
                         </div>
 
                         {/* Weight & Color */}
                         <div>
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Trọng lượng (kg)
                             </label>
                             <input
@@ -416,14 +419,14 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 name="weight"
                                 value={formData.weight}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 placeholder="VD: 12.5"
                                 step="0.1"
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Màu sắc
                             </label>
                             <input
@@ -431,14 +434,14 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 name="color"
                                 value={formData.color}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 placeholder="VD: Đen, Xanh dương"
                             />
                         </div>
 
                         {/* Year & Usage */}
                         <div>
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Năm sản xuất
                             </label>
                             <input
@@ -446,14 +449,14 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 name="yearOfManufacture"
                                 value={formData.yearOfManufacture}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 min="1900"
                                 max={new Date().getFullYear()}
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Lịch sử sử dụng (tháng)
                             </label>
                             <input
@@ -461,14 +464,14 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 name="usageHistory"
                                 value={formData.usageHistory}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 min="0"
                             />
                         </div>
 
                         {/* Price & Stock */}
                         <div>
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Giá (VNĐ) <span className="text-red-500">*</span>
                             </label>
                             <input
@@ -476,14 +479,14 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 name="price"
                                 value={formData.price}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 min="0"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Số lượng
                             </label>
                             <input
@@ -491,14 +494,14 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 name="stockQuantity"
                                 value={formData.stockQuantity}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 min="0"
                             />
                         </div>
 
                         {/* Location */}
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Thành phố
                             </label>
                             <input
@@ -506,40 +509,67 @@ export default function ProductForm({ product, sellerId, onClose }) {
                                 name="locationCity"
                                 value={formData.locationCity}
                                 onChange={handleChange}
-                                className="w-full border rounded-lg px-4 py-2"
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 placeholder="VD: Hồ Chí Minh"
                             />
                         </div>
 
+                        {/* Featured Image */}
+                        <div className="md:col-span-2">
+                            <label className="block text-xs font-medium mb-0.5">
+                                URL Hình ảnh sản phẩm
+                            </label>
+                            <input
+                                type="url"
+                                name="featuredImage"
+                                value={formData.featuredImage}
+                                onChange={handleChange}
+                                className="w-full border rounded px-2 py-1 text-xs"
+                                placeholder="https://example.com/image.jpg"
+                            />
+                            {formData.featuredImage && (
+                                <div className="mt-1">
+                                    <img
+                                        src={formData.featuredImage}
+                                        alt="Preview"
+                                        className="h-16 w-auto rounded object-cover border"
+                                        onError={(e) => {
+                                            e.target.style.display = "none"
+                                        }}
+                                    />
+                                </div>
+                            )}
+                        </div>
+
                         {/* Description */}
                         <div className="md:col-span-2">
-                            <label className="block text-sm font-medium mb-1">
+                            <label className="block text-xs font-medium mb-0.5">
                                 Mô tả
                             </label>
                             <textarea
                                 name="description"
                                 value={formData.description}
                                 onChange={handleChange}
-                                rows={4}
-                                className="w-full border rounded-lg px-4 py-2"
+                                rows={2}
+                                className="w-full border rounded px-2 py-1 text-xs"
                                 placeholder="Mô tả chi tiết về sản phẩm..."
                             />
                         </div>
                     </div>
 
                     {/* Actions */}
-                    <div className="flex justify-end gap-3 pt-4">
+                    <div className="flex justify-end gap-2 pt-2 sticky bottom-0 bg-white border-t mt-2">
                         <button
                             type="button"
                             onClick={() => onClose(false)}
-                            className="px-6 py-2 rounded-lg border hover:bg-gray-50"
+                            className="px-3 py-1 text-xs rounded border hover:bg-gray-50"
                             disabled={loading}
                         >
                             Hủy
                         </button>
                         <button
                             type="submit"
-                            className="px-6 py-2 rounded-lg bg-black text-white hover:bg-gray-800 disabled:bg-gray-400"
+                            className="px-3 py-1 text-xs rounded bg-black text-white hover:bg-gray-800 disabled:bg-gray-400"
                             disabled={loading}
                         >
                             {loading ? "Đang lưu..." : isEditing ? "Cập nhật" : "Tạo mới"}

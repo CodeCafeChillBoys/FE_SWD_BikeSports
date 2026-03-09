@@ -1,5 +1,5 @@
 import React from 'react'
-import { FileText, Users, Bike, LogOut } from 'lucide-react'
+import { FileText, Users, Bike, LogOut, Package, Tag } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { logout } from '../../utils/auth'
 
@@ -11,6 +11,8 @@ export default function Header() {
     const navItems = [
         { path: "/admin", label: "Người dùng", icon: <Users size={18} /> },
         { path: "/admin/listings", label: "Tin đăng", icon: <FileText size={18} /> },
+        { path: "/admin/brands", label: "Thương hiệu", icon: <Package size={18} /> },
+        { path: "/admin/categories", label: "Loại xe", icon: <Tag size={18} /> },
     ]
 
     const isActive = (path) => {

@@ -24,7 +24,7 @@ const STATUS_MAP = {
     deleted: { label: "Đã xóa", variant: "secondary" },
 }
 
-export default function ListingTable({ listings, loading }) {
+export default function ListingTable({ listings, loading, onRefresh }) {
     const [selectedId, setSelectedId] = useState(null)
     const [dialogOpen, setDialogOpen] = useState(false)
 
@@ -151,6 +151,7 @@ export default function ListingTable({ listings, loading }) {
                     listingId={selectedId}
                     open={dialogOpen}
                     onOpenChange={handleDialogClose}
+                    onRefresh={onRefresh}
                 />
             )}
         </div>

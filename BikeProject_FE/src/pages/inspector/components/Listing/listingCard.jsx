@@ -5,6 +5,12 @@ export default function ListingCard({ item, onViewDetails, onUpdateStatus, updat
     const API_BASE_URL =
         import.meta.env.VITE_API_BASE_URL || "https://localhost:7247";
 
+    // 🎯 Lấy hình ảnh từ inspection report hoặc product
+    const imageUrl = item.imagesUrl || item.featuredImage || item.productImage
+    const imageSrc = imageUrl
+        ? (imageUrl.startsWith('http') ? imageUrl : `${API_BASE_URL}/${imageUrl}`)
+        : null
+
     return (
         <div className="
             flex items-center justify-between
@@ -19,11 +25,21 @@ export default function ListingCard({ item, onViewDetails, onUpdateStatus, updat
 
             {/* LEFT */}
             <div className="flex items-center gap-4">
-                <img
-                    src={`${API_BASE_URL}/${item.imagesUrl}`}
-                    alt="inspection"
-                    className="w-20 h-20 object-cover rounded-xl"
-                />
+                {imageSrc ? (
+                    <img
+                        src={imageSrc}
+                        alt={item.productName || "inspection"}
+                        className="w-20 h-20 object-cover rounded-xl"
+                        onError={(e) => {
+                            e.target.onerror = null
+                            e.target.src = "https://placehold.co/80x80?text=No+Image"
+                        }}
+                    />
+                ) : (
+                    <div className="w-20 h-20 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
+                        No Image
+                    </div>
+                )}
 
                 <div>
                     <h3 className="font-semibold text-gray-900">

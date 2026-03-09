@@ -1,4 +1,4 @@
-import { Heart, Eye, ShieldCheck } from 'lucide-react'
+import { Heart, ShieldCheck } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 function BikeCard({ bike }) {
@@ -6,6 +6,12 @@ function BikeCard({ bike }) {
 
     const API_BASE_URL =
         import.meta.env.VITE_API_BASE_URL || 'https://localhost:7247'
+
+    // 🎯 Xử lý hình ảnh với fallback
+    const imageUrl = bike.featuredImage || bike.productImage || bike.image
+    const imageSrc = imageUrl
+        ? (imageUrl.startsWith('http') ? imageUrl : `${API_BASE_URL}/${imageUrl}`)
+        : null
 
     // Map status: 1 = active | 2 = pending | 3 = rejected | 4 = deleted
     const getStatusBadge = () => {
@@ -50,11 +56,21 @@ function BikeCard({ bike }) {
 
             {/* IMAGE */}
             <div className="relative">
-                <img
-                    src={`${API_BASE_URL}/${bike.featuredImage}`}
-                    alt={bike.productName}
-                    className="w-full h-56 object-cover"
-                />
+                {imageSrc ? (
+                    <img
+                        src={imageSrc}
+                        alt={bike.productName || bike.title}
+                        className="w-full h-56 object-cover"
+                        onError={(e) => {
+                            e.target.onerror = null
+                            e.target.src = "https://placehold.co/400x224?text=No+Image"
+                        }}
+                    />
+                ) : (
+                    <div className="w-full h-56 bg-gray-100 flex items-center justify-center text-gray-400">
+                        Không có ảnh
+                    </div>
+                )}
 
                 {getStatusBadge()}
 

@@ -75,13 +75,31 @@ function OrderCard({ order }) {
             {/* ===== ITEM ===== */}
             <div className="flex gap-4 lg:flex-row lg:items-start">
                 {/* Product Image */}
-                {order.featuredImage && (
-                    <img
-                        src={`${API_BASE_URL}/${order.featuredImage}`}
-                        alt={order.productName}
-                        className="w-24 h-24 object-cover rounded-lg border"
-                    />
-                )}
+                {(() => {
+                    const imageUrl = order.featuredImage || order.productImage || order.image
+                    const imageSrc = imageUrl
+                        ? (imageUrl.startsWith('http') ? imageUrl : `${API_BASE_URL}/${imageUrl}`)
+                        : null
+
+                    if (imageSrc) {
+                        return (
+                            <img
+                                src={imageSrc}
+                                alt={order.productName}
+                                className="w-24 h-24 object-cover rounded-lg border"
+                                onError={(e) => {
+                                    e.target.onerror = null
+                                    e.target.src = "https://placehold.co/96x96?text=No+Image"
+                                }}
+                            />
+                        )
+                    }
+                    return (
+                        <div className="w-24 h-24 bg-gray-100 rounded-lg border flex items-center justify-center text-gray-400 text-xs">
+                            Không có ảnh
+                        </div>
+                    )
+                })()}
 
                 {/* Info */}
                 <div className="flex-1">

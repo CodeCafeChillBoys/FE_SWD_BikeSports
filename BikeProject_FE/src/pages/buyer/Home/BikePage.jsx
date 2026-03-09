@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import SearchSection from '../components/search/SearchSection'
 import BikeList from '../components/bike/BikeList'
 import listingApi from '../../../services/listingAPI'
+import productApi from '../../../services/productApi'
 import { filterBikes } from '../../../services/filterBikes'
 
 function BikePage() {
@@ -26,10 +27,47 @@ function BikePage() {
 
                 // Chỉ hiển thị listing đã hoạt động (status = 1)
                 const activeOnly = data.filter(x => x.status === 1)
-                console.log('Active listings (status=1):', activeOnly)
+
+                // 🎯 Nếu listing không có featuredImage, fetch từ product
+                const listingsWithImages = await Promise.all(
+                    activeOnly.map(async (listing) => {
+                        if (!listing.featuredImage && listing.productId) {
+                            try {
+                                const productRes = await productApi.getProductDetail(listing.productId)
+                                const productData = productRes?.data || productRes
+                                return {
+                                    ...listing,
+                                    featuredImage: productData?.featuredImage || listing.featuredImage
+                                }
+                            } catch (err) {
+                                console.warn(`Cannot fetch product ${listing.productId}:`, err)
+                                return listing
+                            }
+                        }
+                        return listing
+                    })
+                )
+
+                console.log('Active listings (status=1):', listingsWithImages)
                 console.log('Total: All=' + data.length + ', Active=' + activeOnly.length)
 
-                setBikes(activeOnly)
+                // Sort theo thời gian mới nhất lên đầu (updatedAt hoặc createdAt)
+                listingsWithImages.sort((a, b) => {
+                    const dateA = new Date(a.updatedAt || a.createdAt || 0)
+                    const dateB = new Date(b.updatedAt || b.createdAt || 0)
+                    return dateB - dateA
+                })
+
+                // 🔍 Debug: Kiểm tra xem listing có featuredImage không
+                if (listingsWithImages.length > 0) {
+                    console.log('📸 First listing images:', {
+                        featuredImage: listingsWithImages[0]?.featuredImage,
+                        productImage: listingsWithImages[0]?.productImage,
+                        image: listingsWithImages[0]?.image
+                    })
+                }
+
+                setBikes(listingsWithImages)
             } catch (error) {
                 console.error("Fetch listings error:", error)
             } finally {

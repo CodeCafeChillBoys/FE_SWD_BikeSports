@@ -9,16 +9,32 @@ export default function InspectorListingCard({
 }) {
     const navigate = useNavigate()
 
+    // 🎯 Xử lý hình ảnh với fallback
+    const imageUrl = item.featuredImage || item.productImage || item.image
+    const imageSrc = imageUrl
+        ? (imageUrl.startsWith('http') ? imageUrl : `${API_BASE_URL}/${imageUrl}`)
+        : null
+
     return (
         <div className="flex items-center justify-between bg-white border border-gray-100 rounded-2xl px-4 py-3 hover:shadow-md hover:border-gray-200 transition-all duration-200">
 
             {/* LEFT */}
             <div className="flex items-center gap-4">
-                <img
-                    src={`${API_BASE_URL}/${item.featuredImage}`}
-                    alt={item.productName}
-                    className="w-28 h-24 object-cover rounded-xl"
-                />
+                {imageSrc ? (
+                    <img
+                        src={imageSrc}
+                        alt={item.productName}
+                        className="w-28 h-24 object-cover rounded-xl"
+                        onError={(e) => {
+                            e.target.onerror = null
+                            e.target.src = "https://placehold.co/112x96?text=No+Image"
+                        }}
+                    />
+                ) : (
+                    <div className="w-28 h-24 rounded-xl bg-gray-100 flex items-center justify-center text-gray-400 text-xs">
+                        Không có ảnh
+                    </div>
+                )}
 
                 <div>
                     <h3 className="font-semibold text-gray-900">

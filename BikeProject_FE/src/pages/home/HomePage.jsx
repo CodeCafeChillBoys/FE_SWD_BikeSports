@@ -154,33 +154,67 @@ export default function HomePage() {
             {/* Hero Section */}
             <section className="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20">
                 <div className="max-w-7xl mx-auto px-4">
-                    <div className="text-center max-w-3xl mx-auto mb-12">
-                        <h1 className="text-4xl md:text-5xl font-bold mb-4">
-                            Nền tảng mua bán xe đạp
-                            <br />
-                            <span className="text-blue-600">uy tín &amp; chuyên nghiệp</span>
-                        </h1>
-                        <p className="text-gray-600 text-lg mb-8">
-                            Kết nối người mua và người bán với hệ thống kiểm định chất lượng,
-                            thanh toán an toàn và hỗ trợ logistics toàn quốc
-                        </p>
+                    <div className="grid lg:grid-cols-2 gap-12 items-center mb-12">
+                        {/* Left: Text Content */}
+                        <div className="text-center lg:text-left">
+                            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+                                Nền tảng mua bán xe đạp
+                                <br />
+                                <span className="text-blue-600">uy tín &amp; chuyên nghiệp</span>
+                            </h1>
+                            <p className="text-gray-600 text-lg mb-8">
+                                Kết nối người mua và người bán với hệ thống kiểm định chất lượng,
+                                thanh toán an toàn và hỗ trợ logistics toàn quốc
+                            </p>
 
-                        {/* Search Bar */}
-                        <div className="flex gap-2 max-w-2xl mx-auto">
-                            <div className="flex-1 relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-                                <Input
-                                    placeholder="Tìm kiếm xe đạp theo tên, thương hiệu, loại..."
-                                    className="pl-10 h-12"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                />
+                            {/* Search Bar */}
+                            <div className="flex gap-2 max-w-2xl mx-auto lg:mx-0">
+                                <div className="flex-1 relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                                    <Input
+                                        placeholder="Tìm kiếm xe đạp theo tên, thương hiệu, loại..."
+                                        className="pl-10 h-12"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                    />
+                                </div>
+                                <Button size="lg" onClick={handleSearch} className="h-12 px-8">
+                                    <Search className="mr-2 h-5 w-5" />
+                                    Tìm kiếm
+                                </Button>
                             </div>
-                            <Button size="lg" onClick={handleSearch} className="h-12 px-8">
-                                <Search className="mr-2 h-5 w-5" />
-                                Tìm kiếm
-                            </Button>
+                        </div>
+
+                        {/* Right: Hero Image */}
+                        <div className="relative">
+                            <div className="relative rounded-2xl overflow-hidden shadow-2xl">
+                                <img
+                                    src="https://images.unsplash.com/photo-1571333250630-f0230c320b6d?q=80&w=1200&auto=format&fit=crop"
+                                    alt="Xe đạp chất lượng cao"
+                                    className="w-full h-[400px] object-cover"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                            </div>
+                            {/* Floating badges */}
+                            <div className="absolute -bottom-4 -left-4 bg-white rounded-xl shadow-lg p-4 flex items-center gap-3">
+                                <div className="bg-green-100 rounded-full p-3">
+                                    <ShieldCheck className="h-6 w-6 text-green-600" />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-sm">Đã kiểm định</p>
+                                    <p className="text-xs text-gray-600">500+ xe chất lượng</p>
+                                </div>
+                            </div>
+                            <div className="absolute -top-4 -right-4 bg-white rounded-xl shadow-lg p-4 flex items-center gap-3">
+                                <div className="bg-blue-100 rounded-full p-3">
+                                    <Star className="h-6 w-6 text-blue-600" />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-sm">Đánh giá cao</p>
+                                    <p className="text-xs text-gray-600">4.8/5 sao</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -245,32 +279,37 @@ export default function HomePage() {
                         {featuredBikes.map((bike) => (
                             <Card
                                 key={bike.id}
-                                className="hover:shadow-xl transition-all cursor-pointer group"
+                                className="hover:shadow-xl transition-all cursor-pointer group overflow-hidden"
                                 onClick={openLogin}
                             >
-                                <div className="relative overflow-hidden">
+                                <div className="relative overflow-hidden bg-gray-100">
                                     <img
                                         src={bike.images[0]}
                                         alt={bike.title}
-                                        className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                                        className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
+                                        onError={(e) => {
+                                            e.target.src = 'https://images.unsplash.com/photo-1485965120184-e220f721d03e?q=80&w=800&auto=format&fit=crop'
+                                        }}
                                     />
                                     {bike.verified && (
-                                        <Badge className="absolute top-3 right-3 bg-green-500 text-white">
+                                        <Badge className="absolute top-3 left-3 bg-green-500 hover:bg-green-600 text-white border-0 shadow-md">
                                             <ShieldCheck className="h-3 w-3 mr-1" />
                                             Đã kiểm định
                                         </Badge>
                                     )}
                                 </div>
-                                <CardContent className="p-4">
-                                    <h3 className="font-medium mb-2 line-clamp-1">{bike.title}</h3>
-                                    <p className="text-sm text-gray-600 mb-3">
+                                <CardContent className="p-5">
+                                    <h3 className="font-semibold text-lg mb-1 line-clamp-1">{bike.title}</h3>
+                                    <p className="text-sm text-gray-500 mb-3">
                                         {bike.brand} • {bike.type}
                                     </p>
                                     <div className="flex items-center justify-between">
-                                        <p className="text-blue-600 font-bold">
+                                        <p className="text-blue-600 font-bold text-lg">
                                             {bike.price.toLocaleString('vi-VN')} ₫
                                         </p>
-                                        <Badge variant="secondary">{bike.condition}</Badge>
+                                        <Badge variant="outline" className="text-xs">
+                                            {bike.condition}
+                                        </Badge>
                                     </div>
                                 </CardContent>
                             </Card>
