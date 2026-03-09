@@ -83,11 +83,24 @@ export default function ProductPage() {
                     ...productsList
                 ]
 
-                console.log("🔁 Merged products with pending local items:", merged)
-                setProducts(merged)
+                // Sort theo thời gian mới nhất lên đầu (updatedAt hoặc createdAt)
+                const sorted = merged.sort((a, b) => {
+                    const dateA = new Date(a.updatedAt || a.createdAt || 0)
+                    const dateB = new Date(b.updatedAt || b.createdAt || 0)
+                    return dateB - dateA // Mới nhất lên đầu
+                })
+
+                console.log("🔁 Merged products with pending local items:", sorted)
+                setProducts(sorted)
             } catch (localErr) {
                 console.warn('Could not merge pending products from localStorage', localErr)
-                setProducts(productsList)
+                // Sort productsList nếu không merge được
+                const sorted = productsList.sort((a, b) => {
+                    const dateA = new Date(a.updatedAt || a.createdAt || 0)
+                    const dateB = new Date(b.updatedAt || b.createdAt || 0)
+                    return dateB - dateA
+                })
+                setProducts(sorted)
             }
 
             console.log("✅ Products list (from server):", productsList)

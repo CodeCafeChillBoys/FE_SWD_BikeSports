@@ -74,6 +74,10 @@ export default function UserEditDialog({ user, open, onOpenChange, onUpdated }) 
             console.log("✅ User updated successfully")
             onUpdated?.()
             onOpenChange(false)
+            // Reload trang để cập nhật dữ liệu mới
+            setTimeout(() => {
+                window.location.reload()
+            }, 500)
         } catch (err) {
             console.error("❌ Update user error:", err)
             setError(err.response?.data || "Cập nhật thất bại. Vui lòng thử lại.")

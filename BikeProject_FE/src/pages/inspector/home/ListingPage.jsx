@@ -32,6 +32,17 @@ export default function ListingPage() {
                 hasReport: item.hasReport || false
             }))
 
+            // Sort theo thời gian mới nhất lên đầu
+            normalized.sort((a, b) => {
+                const dateA = new Date(a.updatedAt || a.createdAt || 0)
+                const dateB = new Date(b.updatedAt || b.createdAt || 0)
+                return dateB - dateA
+            })
+
+            // 🔍 Debug: Kiểm tra xem product có featuredImage không
+            console.log("📦 Products loaded:", normalized)
+            console.log("📸 First product images:", normalized[0]?.featuredImage, normalized[0]?.productImage, normalized[0]?.image)
+
             setListings(normalized)
         } catch (error) {
             console.error("Fetch listings error (inspector)", error)

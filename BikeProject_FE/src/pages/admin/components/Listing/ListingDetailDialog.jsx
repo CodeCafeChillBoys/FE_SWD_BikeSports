@@ -38,7 +38,7 @@ const PRODUCT_STATUS_MAP = {
 }
 
 
-export default function ListingDetailDialog({ listingId, open, onOpenChange }) {
+export default function ListingDetailDialog({ listingId, open, onOpenChange, onRefresh }) {
     const [listing, setListing] = useState(null)
     const [product, setProduct] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -128,6 +128,13 @@ export default function ListingDetailDialog({ listingId, open, onOpenChange }) {
             await listingApi.approveListing(listingId, payload)
             // update local state
             setListing(prev => ({ ...(prev || {}), status: Number(payload.status) }))
+            // Reload trang để cập nhật dữ liệu mới
+            if (onRefresh) {
+                onRefresh()
+            }
+            setTimeout(() => {
+                window.location.reload()
+            }, 500)
         } catch (err) {
             console.error("Approve listing error:", err)
             setError("Không thể cập nhật trạng thái.")

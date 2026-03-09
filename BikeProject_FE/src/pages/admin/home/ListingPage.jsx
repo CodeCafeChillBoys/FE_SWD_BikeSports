@@ -66,6 +66,13 @@ function ListingPage() {
                 })
             )
 
+            // Sort theo thời gian mới nhất lên đầu
+            enriched.sort((a, b) => {
+                const dateA = new Date(a.updatedAt || a.createdAt || 0)
+                const dateB = new Date(b.updatedAt || b.createdAt || 0)
+                return dateB - dateA
+            })
+
             console.log("📦 Enriched listings:", enriched.length)
             setListings(enriched)
 
@@ -159,8 +166,7 @@ function ListingPage() {
             {/* Table */}
             <ListingTable
                 listings={filteredListings}
-                loading={loading}
-            />
+                loading={loading} onRefresh={fetchListings} />
         </div>
     )
 }

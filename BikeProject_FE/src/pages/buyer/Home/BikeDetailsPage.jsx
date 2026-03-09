@@ -15,7 +15,12 @@ function BikeDetailPage() {
         const fetchDetail = async () => {
             try {
                 const res = await productApi.getProductDetail(id)
-                setBike(res)
+                const productData = res?.data || res
+
+                console.log("📦 Product detail loaded:", productData)
+                console.log("🖼️ Featured Image:", productData?.featuredImage)
+
+                setBike(productData)
             } catch (err) {
                 console.error(err)
             } finally {
