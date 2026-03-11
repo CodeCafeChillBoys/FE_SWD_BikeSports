@@ -13,17 +13,16 @@ export default function ProductCard({ product, onEdit, onViewDetail }) {
     }
 
     const getStatusBadge = (status) => {
-        // New mapping:
-        // 1 = available | 2 = sold | 3 = reserved | 4 = hidden | 5 = pending_approval | 6 = rejected
+        // Mapping: 1 = available | 2 = pending | 3 = reserved | 4 = hidden | 5 = sold | 6 = rejected
         const statusMap = {
             1: { text: "Có sẵn", color: "bg-green-100 text-green-800" },
-            2: { text: "Đã bán", color: "bg-blue-100 text-blue-800" },
+            2: { text: "Chờ duyệt", color: "bg-orange-100 text-orange-800" },
             3: { text: "Đã đặt", color: "bg-yellow-100 text-yellow-800" },
             4: { text: "Đã ẩn", color: "bg-gray-100 text-gray-800" },
-            5: { text: "Chờ duyệt", color: "bg-orange-100 text-orange-800" },
+            5: { text: "Đã bán", color: "bg-blue-100 text-blue-800" },
             6: { text: "Từ chối", color: "bg-red-100 text-red-800" },
         }
-        const badge = statusMap[status] || statusMap[0]
+        const badge = statusMap[status] || { text: "Không xác định", color: "bg-gray-100 text-gray-600" }
         return (
             <span className={`px-2 py-1 rounded text-xs font-medium ${badge.color}`}>
                 {badge.text}
@@ -60,12 +59,6 @@ export default function ProductCard({ product, onEdit, onViewDetail }) {
                 </button>
             </div>
 
-            {/* Badges */}
-            <div className="flex flex-wrap gap-2 mb-3">
-                {getStatusBadge(product.status)}
-                {getInspectionBadge(product.inspectionStatus)}
-            </div>
-
             {/* Info Grid */}
             <div className="space-y-2 text-sm text-gray-600 mb-4">
                 <div className="flex justify-between">
@@ -98,6 +91,20 @@ export default function ProductCard({ product, onEdit, onViewDetail }) {
                     <div className="flex justify-between">
                         <span>Địa điểm:</span>
                         <span className="font-medium">{product.locationCity}</span>
+                    </div>
+                )}
+                {product.createdAt && (
+                    <div className="flex justify-between pt-2 border-t border-gray-100 mt-2">
+                        <span>Ngày tạo:</span>
+                        <span className="font-medium text-gray-500">
+                            {new Date(product.createdAt).toLocaleDateString("vi-VN", {
+                                day: "2-digit",
+                                month: "2-digit",
+                                year: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                            })}
+                        </span>
                     </div>
                 )}
             </div>

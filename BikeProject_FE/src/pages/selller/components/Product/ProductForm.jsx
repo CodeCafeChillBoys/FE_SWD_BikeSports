@@ -40,8 +40,8 @@ export default function ProductForm({ product, sellerId, onClose }) {
         stockQuantity: 1,
         locationCity: "",
         featuredImage: "",
-        // Default to pending approval + not inspected according to new schema
-        status: 5,
+        // Default to available + not inspected
+        status: 1,
         inspectionStatus: 1
     })
 
